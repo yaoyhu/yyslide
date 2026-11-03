@@ -1,0 +1,23 @@
+version: 2
+
+builds:
+  - main: .
+    binary: yyslide
+    env: [CGO_ENABLED=0]
+    goos: [darwin, linux, windows]
+    goarch: [amd64, arm64]
+    ldflags: ["-s -w -X main.version={{.Version}}"]
+
+archives:
+  # 文件名不带版本号，安装脚本可固定使用 releases/latest/download/<name>
+  - name_template: "yyslide_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github

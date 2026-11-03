@@ -5,7 +5,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>slides-template</title>
+<title>我的幻灯片</title>
 <script>
 MathJax = {
   tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] },
@@ -258,13 +258,45 @@ MathJax = {
     clip-path: polygon(50% 4%, 62% 36%, 96% 50%, 62% 64%, 50% 96%, 36% 64%, 4% 50%, 36% 36%);
   }
   .slide .aigc a { color: rgba(0, 64, 152, .75); }
+  /* 打印 / 导出 PDF（?print）：所有页按 16:9 依次排开，每页一张纸，关闭动画。 */
+  @page { size: 1280px 720px; margin: 0; }
+  html.print, html.print body { height: auto; overflow: visible; }
+  html.print .slide {
+    position: relative; display: block; width: 100vw; height: 100vh;
+    break-after: page; animation: none;
+  }
+  html.print .slide.cover { display: flex; }
+  html.print #pager, html.print #progress { display: none; }
+  @media print { * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style>
 </head>
 <body>
 <!-- 在 MY_SLIDES 中编辑每一页；每页开头的 h1 会成为顶部标题栏。 -->
 <script>
 // __SLIDES_DATA_START__
-const MY_SLIDES = ["\u003ch1\u003eJYY Slides Template\u003c/h1\u003e\n\u003ch2\u003e科大蓝 · Markdown · 离线播放\u003c/h2\u003e\n\u003cp\u003e一份可直接复制修改的完整编写示例\u003c/p\u003e\n\u003cblockquote\u003e\n\u003cp\u003e内容写在 Markdown 中，样式集中在模板中，浏览器负责播放。\u003c/p\u003e\n\u003c/blockquote\u003e", "\u003ch1\u003e从 Markdown 开始\u003c/h1\u003e\n\u003cp\u003e每页建议以一级标题 \u003ccode\u003e#\u003c/code\u003e 开头，它会自动成为顶部标题栏。第一页自动使用封面版式；章节过渡页可在开头加一行 \u003ccode\u003e\u0026lt;!-- cover --\u0026gt;\u003c/code\u003e。\u003c/p\u003e\n\u003cp\u003e使用\u003cstrong\u003e单独一行\u003c/strong\u003e \u003ccode\u003e---\u003c/code\u003e 分隔页面：\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-markdown\"\u003e# 第一页标题\n\n第一页正文。\n\n---\n\n# 第二页标题\n\n第二页正文。\n\u003c/code\u003e\u003c/pre\u003e\n\u003col\u003e\n\u003cli\u003e新建或复制一个 \u003ccode\u003e.md\u003c/code\u003e 文件。\u003c/li\u003e\n\u003cli\u003e按上面的方式分页并填写内容。\u003c/li\u003e\n\u003cli\u003e运行 \u003ccode\u003euv run python build.py my-talk.md\u003c/code\u003e。\u003c/li\u003e\n\u003cli\u003e用浏览器打开生成的 \u003ccode\u003emy-talk.html\u003c/code\u003e。\u003c/li\u003e\n\u003c/ol\u003e", "\u003ch1\u003e文字、列表与引用\u003c/h1\u003e\n\u003ch2\u003e常用 Markdown 排版\u003c/h2\u003e\n\u003cp\u003e支持 \u003cstrong\u003e粗体\u003c/strong\u003e、\u003cmark\u003e醒目标记\u003c/mark\u003e、\u003cem\u003e斜体\u003c/em\u003e、\u003cdel\u003e删除线\u003c/del\u003e、\u003ccode\u003e行内代码\u003c/code\u003e 和 \u003ca href=\"README.md\"\u003e项目 README\u003c/a\u003e。\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e无序列表适合并列要点\u003c/li\u003e\n\u003cli\u003e每页建议突出一个核心主题\u003c/li\u003e\n\u003cli\u003e内容过多时优先拆成多页\u003c/li\u003e\n\u003c/ul\u003e\n\u003cblockquote\u003e\n\u003cp\u003e引用块适合放置结论、核心观点或补充说明。\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003ctable\u003e\n\u003cthead\u003e\n\u003ctr\u003e\n  \u003cth\u003eMarkdown 写法\u003c/th\u003e\n  \u003cth\u003e显示效果\u003c/th\u003e\n\u003c/tr\u003e\n\u003c/thead\u003e\n\u003ctbody\u003e\n\u003ctr\u003e\n  \u003ctd\u003e\u003ccode\u003e**重点**\u003c/code\u003e\u003c/td\u003e\n  \u003ctd\u003e\u003cstrong\u003e重点\u003c/strong\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e\u003ccode\u003e==警示==\u003c/code\u003e\u003c/td\u003e\n  \u003ctd\u003e\u003cmark\u003e警示\u003c/mark\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e\u003ccode\u003e*强调*\u003c/code\u003e\u003c/td\u003e\n  \u003ctd\u003e\u003cem\u003e强调\u003c/em\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e\u003ccode\u003e`code`\u003c/code\u003e\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003ecode\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003c/tbody\u003e\n\u003c/table\u003e", "\u003ch1\u003e代码高亮\u003c/h1\u003e\n\u003cp\u003e在 fenced code block 后标注语言名称，浏览器会使用 highlight.js 自动高亮。\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-python\"\u003efrom pathlib import Path\n\n\ndef build_slides(source: str) -\u0026gt; Path:\n    source_path = Path(source)\n    output_path = source_path.with_suffix(\u0026quot;.html\u0026quot;)\n    print(f\u0026quot;构建 {source_path} → {output_path}\u0026quot;)\n    return output_path\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003e支持 Python、JavaScript、C/C++、Java、Go、Rust 等常见语言。\u003c/p\u003e", "\u003ch1\u003e数学公式\u003c/h1\u003e\n\u003cp\u003e使用 \u003ccode\u003e$...$\u003c/code\u003e 编写行内公式，例如质能方程 $E = mc^2$。\u003c/p\u003e\n\u003cp\u003e使用 \u003ccode\u003e$$...$$\u003c/code\u003e 编写独立公式：\u003c/p\u003e\n\u003cp\u003e$$\\int_0^\\infty e^{-x^2}\\,dx = \\frac{\\sqrt{\\pi}}{2}$$\u003c/p\u003e\n\u003cp\u003e矩阵和多行推导也可以直接使用 TeX：\u003c/p\u003e\n\u003cp\u003e$$\n\\begin{aligned}\nf'(x) \u0026amp;= \\lim_{h \\to 0}\\frac{f(x+h)-f(x)}{h} \\\\\n\\nabla \\cdot \\mathbf{E} \u0026amp;= \\frac{\\rho}{\\varepsilon_0}\n\\end{aligned}\n$$\u003c/p\u003e\n\u003cp\u003e公式由本地 MathJax 渲染，离线打开也能正常显示。\u003c/p\u003e", "\u003ch1\u003e表格与任务列表\u003c/h1\u003e\n\u003ch2\u003e表格\u003c/h2\u003e\n\u003ctable\u003e\n\u003cthead\u003e\n\u003ctr\u003e\n  \u003cth\u003e内容\u003c/th\u003e\n  \u003cth\u003e推荐写法\u003c/th\u003e\n  \u003cth\u003e运行期依赖\u003c/th\u003e\n\u003c/tr\u003e\n\u003c/thead\u003e\n\u003ctbody\u003e\n\u003ctr\u003e\n  \u003ctd\u003e普通排版\u003c/td\u003e\n  \u003ctd\u003eMarkdown\u003c/td\u003e\n  \u003ctd\u003e浏览器\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e代码\u003c/td\u003e\n  \u003ctd\u003e带语言名称的代码块\u003c/td\u003e\n  \u003ctd\u003ehighlight.js\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e数学公式\u003c/td\u003e\n  \u003ctd\u003eTeX\u003c/td\u003e\n  \u003ctd\u003eMathJax\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e特殊布局\u003c/td\u003e\n  \u003ctd\u003e原生 HTML + CSS\u003c/td\u003e\n  \u003ctd\u003e浏览器\u003c/td\u003e\n\u003c/tr\u003e\n\u003c/tbody\u003e\n\u003c/table\u003e\n\u003ch2\u003e任务列表\u003c/h2\u003e\n\u003cul\u003e\n\u003cli class=\"task-list-item\"\u003e\u003cinput class=\"task-list-item-checkbox\" type=\"checkbox\" disabled checked/\u003e安装构建依赖\u003c/li\u003e\n\u003cli class=\"task-list-item\"\u003e\u003cinput class=\"task-list-item-checkbox\" type=\"checkbox\" disabled checked/\u003e编写 Markdown\u003c/li\u003e\n\u003cli class=\"task-list-item\"\u003e\u003cinput class=\"task-list-item-checkbox\" type=\"checkbox\" disabled/\u003e构建 HTML\u003c/li\u003e\n\u003cli class=\"task-list-item\"\u003e\u003cinput class=\"task-list-item-checkbox\" type=\"checkbox\" disabled/\u003e全屏检查实际效果\u003c/li\u003e\n\u003c/ul\u003e", "\u003ch1\u003e插入图片\u003c/h1\u003e\n\u003cp\u003e先将图片放入项目的 \u003ccode\u003eimages/\u003c/code\u003e 目录，再使用相对路径：\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-markdown\"\u003e![Markdown 构建流程](images/example.svg)\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003e\u003cimg src=\"images/example.svg\" alt=\"Markdown 构建流程\" /\u003e\u003c/p\u003e\n\u003cp\u003e图片路径相对于\u003cstrong\u003e生成的 HTML 文件\u003c/strong\u003e。模板会限制图片宽高，并随正文一起自动缩放。\u003c/p\u003e", "\u003ch1\u003e原生 HTML 增强\u003c/h1\u003e\n\u003cp\u003e需要控制图片宽度或实现特殊布局时，可以在 Markdown 中直接写 HTML：\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-html\"\u003e\u0026lt;img src=\u0026quot;images/example.svg\u0026quot;\n     alt=\u0026quot;Markdown 构建流程\u0026quot;\n     style=\u0026quot;width: 60%\u0026quot;\u0026gt;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cdiv style=\"display: grid; grid-template-columns: 1fr 1fr; gap: 1.2em; margin-top: .8em;\"\u003e\n  \u003cdiv style=\"padding: .8em 1em; background: #f5f8fc; border-left: 4px solid #004098;\"\u003e\n    \u003cstrong\u003e常规内容\u003c/strong\u003e\u003cbr\u003e优先使用 Markdown，保持源文件简洁。\n  \u003c/div\u003e\n  \u003cdiv style=\"padding: .8em 1em; background: #f5f8fc; border-left: 4px solid #004098;\"\u003e\n    \u003cstrong\u003e特殊布局\u003c/strong\u003e\u003cbr\u003e少量使用 HTML，通用样式放进模板。\n  \u003c/div\u003e\n\u003c/div\u003e", "\u003ch1\u003e构建、播放与检查\u003c/h1\u003e\n\u003cpre\u003e\u003ccode class=\"language-bash\"\u003euv run python build.py slides-template.md\nopen slides-template.html\n\u003c/code\u003e\u003c/pre\u003e\n\u003ctable\u003e\n\u003cthead\u003e\n\u003ctr\u003e\n  \u003cth\u003e操作\u003c/th\u003e\n  \u003cth\u003e按键\u003c/th\u003e\n\u003c/tr\u003e\n\u003c/thead\u003e\n\u003ctbody\u003e\n\u003ctr\u003e\n  \u003ctd\u003e下一页\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003eSpace\u003c/code\u003e、\u003ccode\u003e→\u003c/code\u003e、\u003ccode\u003e↓\u003c/code\u003e、\u003ccode\u003eEnter\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e上一页\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003e←\u003c/code\u003e、\u003ccode\u003e↑\u003c/code\u003e、\u003ccode\u003eBackspace\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e首页 / 末页\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003eHome\u003c/code\u003e / \u003ccode\u003eEnd\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e进入 / 退出全屏\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003ef\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003c/tbody\u003e\n\u003c/table\u003e\n\u003cul\u003e\n\u003cli\u003e修改 Markdown 或模板后，需要重新构建 HTML。\u003c/li\u003e\n\u003cli\u003e页面会自动缩小溢出的正文，但内容过多时仍建议拆页。\u003c/li\u003e\n\u003cli\u003e分享时同时携带 HTML、\u003ccode\u003evendor/\u003c/code\u003e 和实际使用的图片目录。\u003c/li\u003e\n\u003c/ul\u003e"];
+const MY_SLIDES = [
+  String.raw`<h1>我的幻灯片</h1>
+    <h2>副标题或课程名称</h2>
+    <p>演讲者 · 日期</p>
+    <blockquote>在这里放一句核心观点。</blockquote>`,
+
+  String.raw`<h1>文字与列表</h1>
+    <h2>常用排版</h2>
+    <p>支持<strong>重点文字</strong>、<a href="https://example.com">链接</a>和行内 <code>code</code>。</p>
+    <ul>
+      <li>第一项</li>
+      <li>第二项</li>
+      <li>第三项</li>
+    </ul>
+    <blockquote>引用内容</blockquote>`,
+
+  String.raw`<h1>代码与公式</h1>
+    <pre><code class="language-python">def hello():
+    print("Hello, slides!")
+</code></pre>
+    <p>行内公式 $E = mc^2$</p>
+    <p>$$\int_0^\infty e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}$$</p>`,
+];
 // __SLIDES_DATA_END__
 </script>
 <div id="pager"><span id="cur">1</span> / <span id="total">–</span></div>
@@ -273,13 +305,18 @@ const MY_SLIDES = ["\u003ch1\u003eJYY Slides Template\u003c/h1\u003e\n\u003ch2\u
 // 组装单页：开头的 <h1> 提为 .titlebar（放在 .inner 之外），
 // 使标题条不参与整页缩放、左右始终顶格；其余内容进 .inner 等比缩放。
 // 首页、以及开头写了 <!-- cover --> 的页使用封面版式。
+const PRINT = new URLSearchParams(location.search).has('print');
+if (PRINT) document.documentElement.classList.add('print');
+// 地址栏 #/N 记录当前页（从 1 开始），刷新或预览自动重载后停留在同一页
+const START = Math.max(0, Math.min(MY_SLIDES.length - 1, (parseInt(location.hash.slice(2)) || 1) - 1));
+
 function makeSlide(html, i) {
   const section = document.createElement('section');
   const marker = /^\s*<!--\s*cover\s*-->/i;
   const cover = i === 0 || marker.test(html);
   html = html.replace(marker, '');
   // 首页带 no-anim：刷新时直接显示、不播入场动画；首次翻页即移除，此后正常过渡
-  section.className = 'slide' + (cover ? ' cover' : '') + (i === 0 ? ' active no-anim' : '');
+  section.className = 'slide' + (cover ? ' cover' : '') + (i === START || PRINT ? ' active no-anim' : '');
   const m = html.match(/^\s*<h1[^>]*>[\s\S]*?<\/h1\s*>/i);
   const title = m ? '<div class="titlebar">' + m[0].trim() + '</div>' : '';
   const body = m ? html.slice(m[0].length) : html;
@@ -290,18 +327,40 @@ function makeSlide(html, i) {
 const slides = MY_SLIDES.map((html, i) => makeSlide(html, i));
 slides.forEach(s => document.body.insertBefore(s, document.getElementById('pager')));
 
-let i = 0;
+let i = START;
 const cur = document.getElementById('cur');
 const total = document.getElementById('total');
 const progress = document.getElementById('progress');
 
+cur.textContent = i + 1;
 total.textContent = slides.length;
-progress.style.width = `${100 / slides.length}%`;
+progress.style.width = `${(i + 1) / slides.length * 100}%`;
 
-// 初始高亮/排版当前页
-if (window.hljs) slides[0].querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+// 每页首次显示时再高亮；已高亮过的跳过（highlight.js 对重复高亮会在控制台报警告）
+function highlight(s) {
+  if (window.hljs) s.querySelectorAll('pre code:not([data-highlighted])').forEach(el => hljs.highlightElement(el));
+}
+
+// 初始高亮/排版当前页（打印模式下为全部页）
+(PRINT ? slides : [slides[i]]).forEach(highlight);
 fitSlides();
 if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise().then(fitSlides, fitSlides);
+
+// 打印模式：等公式、字体和图片全部就绪后排版，再标记 data-ready 供导出 PDF 的浏览器等待
+if (PRINT) {
+  const mathReady = window.MathJax && MathJax.startup && MathJax.startup.promise
+    ? MathJax.startup.promise.then(() => MathJax.typesetPromise && MathJax.typesetPromise())
+    : Promise.resolve();
+  const imagesReady = () => Promise.all([...document.images].map(img => img.complete ? null
+    : new Promise(r => { img.addEventListener('load', r); img.addEventListener('error', r); })));
+  mathReady.catch(() => {})
+    .then(() => document.fonts && document.fonts.ready)
+    .then(imagesReady)
+    .then(() => {
+      fitSlides();
+      requestAnimationFrame(() => requestAnimationFrame(() => { document.documentElement.dataset.ready = '1'; }));
+    });
+}
 
 function show(n) {
   const target = Math.max(0, Math.min(n, slides.length - 1));
@@ -319,16 +378,23 @@ function show(n) {
   cur.textContent = i + 1;
   total.textContent = slides.length;
   progress.style.width = `${(i + 1) / slides.length * 100}%`;
+  history.replaceState(null, '', `#/${i + 1}`);
   window.scrollTo(0, 0);
-  if (window.hljs) slides[i].querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+  highlight(slides[i]);
   fitSlides();
   if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise().then(fitSlides, fitSlides);
 }
 
+// 在地址栏手动修改 #/N 时跳到对应页（show 用 replaceState 更新地址，不会触发此事件）
+window.addEventListener('hashchange', () => {
+  const n = parseInt(location.hash.slice(2));
+  if (n) show(n - 1);
+});
+
 // 标题保留独立字号；正文按扣除标题、padding 后的真实空间等比缩小。
 function fitSlides() {
   slides.forEach(s => {
-    if (!s.classList.contains('active')) return; // 隐藏页没有可测量的尺寸
+    if (!s.classList.contains('active') && !PRINT) return; // 隐藏页没有可测量的尺寸
     const inner = s.querySelector('.inner');
     const title = s.querySelector('.titlebar');
     const css = getComputedStyle(s);
@@ -380,18 +446,37 @@ if (document.fonts) {
   document.fonts.addEventListener('loadingdone', scheduleFit);
 }
 
+// 中文输入法开启时 e.key 为 'Process'，大写锁定时为 'J'：
+// 先统一小写，无法识别时再按物理键位 e.code 判断（不影响 Dvorak 等布局）。
+const CODE_KEYS = { Space: ' ', Enter: 'Enter', Backspace: 'Backspace' };
+function keyOf(e) {
+  if (e.key.length === 1) return e.key.toLowerCase();
+  if (e.key === 'Process' || e.key === 'Unidentified') {
+    if (/^Key[A-Z]$/.test(e.code)) return e.code.slice(3).toLowerCase();
+    return CODE_KEYS[e.code] || e.key;
+  }
+  return e.key;
+}
+
+// Safari 16.4 之前只有带 webkit 前缀的全屏接口
+function toggleFullscreen() {
+  const d = document, el = d.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen;
+  const exit = d.exitFullscreen || d.webkitExitFullscreen;
+  const p = (d.fullscreenElement || d.webkitFullscreenElement) ? exit.call(d) : req.call(el);
+  if (p && p.catch) p.catch(() => {});
+}
+
 document.addEventListener('keydown', (e) => {
-  switch (e.key) {
+  if (PRINT || e.metaKey || e.ctrlKey || e.altKey) return;  // 不拦截 Cmd+L、Cmd+F 等浏览器快捷键
+  switch (keyOf(e)) {
     case ' ': case 'ArrowRight': case 'ArrowDown': case 'j': case 'l': case 'Enter': case 'PageDown':
       e.preventDefault(); show(i + 1); break;
     case 'ArrowLeft': case 'ArrowUp': case 'h': case 'k': case 'Backspace': case 'PageUp':
       e.preventDefault(); show(i - 1); break;
     case 'Home': e.preventDefault(); show(0); break;
     case 'End': e.preventDefault(); show(slides.length - 1); break;
-    case 'f':
-      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-      else document.exitFullscreen();
-      break;
+    case 'f': toggleFullscreen(); break;
     case 'q':
       window.close();
       break;

@@ -26,10 +26,10 @@
 第二页正文。
 ```
 
-1. 新建或复制一个 `.md` 文件。
-2. 按上面的方式分页并填写内容。
-3. 运行 `uv run python build.py my-talk.md`。
-4. 用浏览器打开生成的 `my-talk.html`。
+1. 运行 `yyslide new my-talk` 创建工程。
+2. 在 `my-talk/slides.md` 中分页并填写内容。
+3. 运行 `yyslide preview`，边写边看，保存后自动刷新。
+4. 运行 `yyslide build` 或 `yyslide pdf` 生成成品。
 
 ---
 
@@ -37,7 +37,7 @@
 
 ## 常用 Markdown 排版
 
-支持 **粗体**、==醒目标记==、*斜体*、~~删除线~~、`行内代码` 和 [项目 README](README.md)。
+支持 **粗体**、==醒目标记==、*斜体*、~~删除线~~、`行内代码` 和 [链接](https://github.com/yaoyhu/yyslide)。
 
 - 无序列表适合并列要点
 - 每页建议突出一个核心主题
@@ -75,7 +75,7 @@ def build_slides(source: str) -> Path:
 
 # 数学公式
 
-使用 `$...$` 编写行内公式，例如质能方程 $E = mc^2$。
+使用 `$...$` 编写行内公式，例如质能方程 $E = mc^2$。需要显示美元符号时写 `\$`，例如 \$100。
 
 使用 `$$...$$` 编写独立公式：
 
@@ -116,7 +116,7 @@ $$
 
 # 插入图片
 
-先将图片放入项目的 `images/` 目录，再使用相对路径：
+先将图片放入工程的 `images/` 目录，再使用相对路径：
 
 ```markdown
 ![Markdown 构建流程](images/example.svg)
@@ -124,7 +124,7 @@ $$
 
 ![Markdown 构建流程](images/example.svg)
 
-图片路径相对于**生成的 HTML 文件**。模板会限制图片宽高，并随正文一起自动缩放。
+图片路径相对于 **Markdown 文件**，构建时会自动打包进 HTML。模板会限制图片宽高，并随正文一起自动缩放。
 
 ---
 
@@ -152,8 +152,9 @@ $$
 # 构建、播放与检查
 
 ```bash
-uv run python build.py slides-template.md
-open slides-template.html
+yyslide preview   # 实时预览
+yyslide build     # → dist/<名称>.html
+yyslide pdf       # → dist/<名称>.pdf
 ```
 
 | 操作 | 按键 |
@@ -163,6 +164,6 @@ open slides-template.html
 | 首页 / 末页 | `Home` / `End` |
 | 进入 / 退出全屏 | `f` |
 
-- 修改 Markdown 或模板后，需要重新构建 HTML。
+- 预览时保存即刷新，并停留在当前页。
 - 页面会自动缩小溢出的正文，但内容过多时仍建议拆页。
-- 分享时同时携带 HTML、`vendor/` 和实际使用的图片目录。
+- `dist/` 下的 HTML 已内联字体、公式库和图片，单个文件即可分享。
