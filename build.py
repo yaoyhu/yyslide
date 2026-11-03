@@ -63,7 +63,7 @@ def main():
     template_path = Path(__file__).parent / "templates" / "template.html"
     markdown = mistune.create_markdown(
         escape=False,
-        plugins=["strikethrough", "table", "task_lists"],
+        plugins=["strikethrough", "mark", "table", "task_lists"],
     )
     slides = [render_slide(markdown, page) for page in split_slides(source_path.read_text(encoding="utf-8"))]
     if not slides:

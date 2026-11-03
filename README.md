@@ -17,7 +17,8 @@ jyy-slides-template/
 │   └── example.svg           # 示例图片资源
 ├── vendor/
 │   ├── mathjax-tex-svg.js    # 本地 MathJax，用于公式渲染
-│   └── highlight.min.js      # 本地 highlight.js，用于代码高亮
+│   ├── highlight.min.js      # 本地 highlight.js，用于代码高亮
+│   └── fonts/                # JetBrains Mono 等宽字体（OFL 授权）
 ├── requirements.txt          # Python 构建依赖
 ├── .gitignore                # 排除本地环境和系统文件
 └── README.md                 # 架构、配置、构建与发布说明
@@ -54,7 +55,12 @@ Python 和 Mistune 只在构建时需要；打开生成后的 HTML 不需要安�
 - 提供前后翻页、首尾跳转、入场/离场动画和全屏播放。
 - 使用本地 highlight.js 高亮代码，使用本地 MathJax 渲染 TeX 公式。
 
-第三方运行库均已下载到 `vendor/`，正常文字、代码和公式均可离线显示，不依赖 CDN。
+- 第一页自动使用封面版式（整页科大蓝、标题居中）；其他页在开头写一行 `<!-- cover -->` 即可作为章节过渡页。
+- 底部进度条和右下角页码显示播放进度。
+
+第三方运行库和代码字体均已下载到 `vendor/`，正常文字、代码和公式均可离线显示，不依赖 CDN。
+
+强调写法约定：`**粗体**` 显示为科大蓝，`==标记==` 显示为红色醒目标记，用于少量需要警示的内容。
 
 ## 构建环境
 

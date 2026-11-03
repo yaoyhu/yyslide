@@ -5,7 +5,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>JYY Slides Template 编写示例</title>
+<title>slides-template</title>
 <script>
 MathJax = {
   tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] },
@@ -30,13 +30,23 @@ MathJax = {
     --muted: #555555; --border: #999999;
     --blue: #004098; --cyan: #0e7490; --green: #15803d;
     --red: #b91c1c; --orange: #c2410c; --yellow: #a16207;
-    --code-bg: #fafbfc; --quote-bg: #f7f7f7;
+    --code-bg: #f8fafc; --quote-bg: #f3f6fb;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
+            "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    /* 等宽字体随项目分发（vendor/fonts）；中文回落到黑体，与正文保持一致 */
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+            "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", monospace;
+  }
+  @font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal; font-weight: 100 800; font-display: swap;
+    src: url("vendor/fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2");
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; }
   body {
     background: var(--bg); color: var(--fg);
-    font-family: system-ui, "PingFang SC", "Noto Sans CJK SC", sans-serif;
+    font-family: var(--sans);
     overflow: hidden;
   }
   .slide {
@@ -49,8 +59,8 @@ MathJax = {
     line-height: 1.7;
   }
   .slide .inner {
-    position: relative; z-index: 1;   /* 盖在顶部光斑 ::before 之上 */
-    display: flow-root;         /* 包含首尾 margin 和浮动，保证测量完整 */
+    position: relative; z-index: 1;
+    display: flow-root;        /* 包含首尾 margin 和浮动，保证测量完整 */
     width: 100%;
     overflow-wrap: anywhere;
     transform-origin: top left;
@@ -65,43 +75,40 @@ MathJax = {
   .slide.no-anim { animation: none; }  /* 初始首页直接显示（须置于上方两条规则之后） */
   /* 标题条：JS 把每页开头的 <h1> 提到 .inner 之外 → 不参与整页等比缩放，
      负 margin 抵消 slide 的 padding，左右/上方始终顶格；无圆角。
-     深色毛玻璃：模糊的是 ::before 生成的顶部彩色光斑。 */
+     彩色光斑直接画在标题条自身背景里，不会溢出到正文区。 */
   .slide .titlebar {
     position: relative; z-index: 2;
     margin: -3vh -4vw .8em;      /* slide padding 为 3vh 4vw */
     padding: .3em 4vw;           /* 与正文（h2/p/li）左线对齐 */
-    background: rgba(0, 64, 152, .78);
-    -webkit-backdrop-filter: blur(14px) saturate(1.5);
-    backdrop-filter: blur(14px) saturate(1.5);
-    border-bottom: 1px solid rgba(255, 255, 255, .25);
+    background:
+      radial-gradient(30em 10em at 10% -40%, rgba(59, 130, 246, .55), transparent 65%),
+      radial-gradient(30em 10em at 95% -30%, rgba(6, 182, 212, .4), transparent 65%),
+      linear-gradient(100deg, #003a8c, var(--blue) 45%, #0a52ab);
+    box-shadow: 0 2px 10px rgba(0, 40, 100, .12);
   }
   .slide .titlebar h1 {
     font-size: 1.55em; color: #fff;
     overflow-wrap: anywhere;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .55), 0 2px 10px rgba(0, 0, 0, .35);
+    letter-spacing: .02em;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, .18);
   }
-  .slide .titlebar h1 :is(b, strong) { color: #fca5a5; }  /* 深色条上红色加粗提亮 */
+  .slide .titlebar h1 :is(b, strong, mark) { color: #fde68a; background: none; }  /* 深色条上改用暖黄提亮 */
   .slide .inner h1 { font-size: 1.55em; margin: 0 0 .6em; border-bottom: 2px solid #8fa3c8; padding-bottom: .3em; }  /* 非页首 h1 兜底 */
-  /* 顶部静态彩色光斑：给毛玻璃提供可被模糊的背景（无动画），正文区仍为白底 */
-  .slide::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0; height: 5em;
-    z-index: 0;
-    background:
-      radial-gradient(30em 10em at 12% -30%, rgba(59, 130, 246, .5), transparent 60%),
-      radial-gradient(26em 9em at 58% -50%, rgba(0, 64, 152, .42), transparent 60%),
-      radial-gradient(30em 10em at 94% -25%, rgba(6, 182, 212, .4), transparent 60%);
-    pointer-events: none;
-  }
-  .slide h2 { font-size: 1.25em; color: var(--fg); margin: 1em 0 .5em; }
-  .slide h3 { font-size: 1.2em; color: var(--muted); margin: 1em 0 .4em; }
+  .slide h2 { font-size: 1.3em; color: var(--blue); margin: 1em 0 .5em; line-height: 1.4; }
+  .slide h3 { font-size: 1.1em; color: var(--muted); margin: 1em 0 .4em; line-height: 1.4; }
+  .slide .inner > :first-child { margin-top: 0; }
   .slide p { margin: .5em 0; }
-  .slide :is(b, strong), .slide :is(h1, h2, h3) :is(b, strong) { color: var(--red); }
+  /* 粗体用主题蓝；需要醒目警示时用 ==文字==（<mark>）显示红色 */
+  .slide :is(b, strong) { color: var(--blue); }
+  .slide :is(h2, h3) :is(b, strong) { color: inherit; }
+  .slide mark {
+    color: var(--red); font-weight: 700;
+    background: linear-gradient(transparent 62%, color-mix(in srgb, var(--red) 14%, transparent) 0);
+  }
   .slide ul, .slide ol { padding-left: 1.6em; margin: .5em 0; }
   .slide li { margin: .25em 0; }
   .slide table {
-    width: 100%; margin: .7em 0 1em;
+    width: auto; min-width: 50%; margin: .7em 0 1em;  /* 按内容收紧，避免两列被拉散 */
     border: 1px solid color-mix(in srgb, var(--blue) 18%, #e5e7eb); border-radius: 8px;
     border-collapse: separate; border-spacing: 0;
     overflow: hidden; font-size: .9em; line-height: 1.5;
@@ -123,7 +130,7 @@ MathJax = {
     display: inline-grid; place-content: center;
     width: .85em; height: .85em; margin: 0 .5em 0 0;
     vertical-align: -.08em;
-    border: 1px solid #d1d9e0; border-radius: .25em;
+    border: 1.5px solid #94a3b8; border-radius: .25em;
     background: #fff; opacity: 1; cursor: default;
   }
   .slide input.task-list-item-checkbox:checked {
@@ -135,30 +142,34 @@ MathJax = {
     transform: translateY(-.04em) rotate(-45deg);
   }
   .slide blockquote {
-    border-left: 3px solid var(--border); padding: .3em 1.2em; margin: .8em 0;
-    color: var(--muted); background: var(--quote-bg);
+    border-left: 4px solid var(--blue); border-radius: 0 6px 6px 0;
+    padding: .45em 1.1em; margin: .8em 0;
+    color: #334155; background: var(--quote-bg);
   }
-  .slide blockquote::before {
-    content: "\201C";
-    float: left;
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 2.8em;
-    line-height: .9;
-    margin: .05em .25em 0 0;
-    color: #bdbdbd;
-    user-select: none;
-  }
+  .slide blockquote > :first-child { margin-top: 0; }
+  .slide blockquote > :last-child { margin-bottom: 0; }
+  /* 代码字号随正文缩放（em），不再固定 pt */
   .slide code {
-    font-size: 16pt;
-    font-family: "JetBrains Mono", "LXGW WenKai", "LXGW WenKai Mono", "霞鹜文楷等宽", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .85em; font-family: var(--mono);
+    font-variant-ligatures: none;  /* 关闭连字，-> == <!-- 按原样显示 */
+  }
+  .slide :not(pre) > code {
+    padding: .08em .35em; border-radius: 4px;
+    color: #0b3a7e; background: color-mix(in srgb, var(--blue) 8%, white);
   }
   .slide pre {
-    background: var(--code-bg); border: 1px solid #e5e7eb; border-radius: 8px;
-    padding: .4em .6em; margin: .8em 0; overflow: visible;
+    background: var(--code-bg); border: 1px solid #e2e8f0; border-radius: 8px;
+    padding: .55em .9em; margin: .8em 0; overflow: visible;
+    line-height: 1.45;           /* 代码不继承正文 1.7 的宽松行距 */
   }
   .slide pre code { background: none; padding: 0; color: var(--fg); }
   .slide pre code.hljs { overflow: visible; }
-  .slide a { color: var(--muted); }
+  .slide a {
+    color: var(--blue);
+    text-decoration-color: color-mix(in srgb, var(--blue) 35%, transparent);
+    text-underline-offset: .18em;
+  }
+  .slide a:hover { text-decoration-color: currentColor; }
   .slide a.badlink {
     color: var(--red); text-decoration: line-through;
     cursor: not-allowed;
@@ -189,11 +200,45 @@ MathJax = {
     object-fit: contain;
   }
   #pager {
-    position: fixed; right: 2.5vw; bottom: 2.5vh;
-    font-size: 14px; color: var(--muted);
+    position: fixed; right: 2.5vw; bottom: 2.5vh; z-index: 3;
+    font-size: 14px; color: color-mix(in srgb, var(--blue) 70%, #94a3b8);
     font-variant-numeric: tabular-nums;
     user-select: none;
   }
+  /* 底部进度条：宽度 = 当前页 / 总页数 */
+  #progress {
+    position: fixed; left: 0; bottom: 0; z-index: 3;
+    height: 3px; width: 0;
+    background: linear-gradient(90deg, var(--blue), #0ea5e9);
+    transition: width .28s cubic-bezier(.22, .61, .36, 1);
+  }
+  /* 封面 / 章节页：首页自动套用，其余页在开头写 <!-- cover --> 启用。
+     白底、水平与垂直居中，标题下方一段蓝色短横线。 */
+  .slide.cover {
+    flex-direction: column; justify-content: center;
+    padding: 6vh 8vw; text-align: center;
+    background:
+      radial-gradient(40em 28em at 100% 100%, color-mix(in srgb, var(--blue) 7%, transparent), transparent 70%),
+      var(--bg);
+  }
+  .slide.cover.active, .slide.cover.leaving { display: flex; }
+  .slide.cover .titlebar {
+    margin: 0 0 .9em; padding: 0 0 .5em;
+    background: none; box-shadow: none;
+  }
+  .slide.cover .titlebar::after {
+    content: ""; display: block; width: 3.2em; height: 5px; margin: .6em auto 0;
+    border-radius: 3px; background: var(--blue);
+  }
+  .slide.cover .titlebar h1 {
+    font-size: 2.3em; line-height: 1.25; color: var(--blue);
+    letter-spacing: .01em; text-shadow: none;
+  }
+  .slide.cover .titlebar h1 :is(b, strong, mark) { color: var(--red); }
+  .slide.cover h2 { color: var(--fg); font-weight: 600; margin: 0 0 .3em; }
+  .slide.cover h3, .slide.cover p { color: var(--muted); }
+  .slide.cover .inner { transform-origin: top center; }
+  .slide.cover blockquote { display: inline-block; max-width: 32em; margin-top: 1.4em; }
   /* AI 补充内容（行内 span）：inline-block 让 padding 上下左右都实际占位生效 */
   .slide span.aigc {
     display: inline-block;
@@ -219,17 +264,22 @@ MathJax = {
 <!-- 在 MY_SLIDES 中编辑每一页；每页开头的 h1 会成为顶部标题栏。 -->
 <script>
 // __SLIDES_DATA_START__
-const MY_SLIDES = ["\u003ch1\u003eJYY Slides Template\u003c/h1\u003e\n\u003ch2\u003e科大蓝 · Markdown · 离线播放\u003c/h2\u003e\n\u003cp\u003e一份可直接复制修改的完整编写示例\u003c/p\u003e\n\u003cblockquote\u003e\n\u003cp\u003e内容写在 Markdown 中，样式集中在模板中，浏览器负责播放。\u003c/p\u003e\n\u003c/blockquote\u003e", "\u003ch1\u003e从 Markdown 开始\u003c/h1\u003e\n\u003cp\u003e每页建议以一级标题 \u003ccode\u003e#\u003c/code\u003e 开头，它会自动成为顶部标题栏。\u003c/p\u003e\n\u003cp\u003e使用\u003cstrong\u003e单独一行\u003c/strong\u003e \u003ccode\u003e---\u003c/code\u003e 分隔页面：\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-markdown\"\u003e# 第一页标题\n\n第一页正文。\n\n---\n\n# 第二页标题\n\n第二页正文。\n\u003c/code\u003e\u003c/pre\u003e\n\u003col\u003e\n\u003cli\u003e新建或复制一个 \u003ccode\u003e.md\u003c/code\u003e 文件。\u003c/li\u003e\n\u003cli\u003e按上面的方式分页并填写内容。\u003c/li\u003e\n\u003cli\u003e运行 \u003ccode\u003euv run python build.py my-talk.md\u003c/code\u003e。\u003c/li\u003e\n\u003cli\u003e用浏览器打开生成的 \u003ccode\u003emy-talk.html\u003c/code\u003e。\u003c/li\u003e\n\u003c/ol\u003e", "\u003ch1\u003e文字、列表与引用\u003c/h1\u003e\n\u003ch2\u003e常用 Markdown 排版\u003c/h2\u003e\n\u003cp\u003e支持 \u003cstrong\u003e粗体\u003c/strong\u003e、\u003cem\u003e斜体\u003c/em\u003e、\u003cdel\u003e删除线\u003c/del\u003e、\u003ccode\u003e行内代码\u003c/code\u003e 和 \u003ca href=\"README.md\"\u003e项目 README\u003c/a\u003e。\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e无序列表适合并列要点\u003c/li\u003e\n\u003cli\u003e每页建议突出一个核心主题\u003c/li\u003e\n\u003cli\u003e内容过多时优先拆成多页\u003c/li\u003e\n\u003c/ul\u003e\n\u003cblockquote\u003e\n\u003cp\u003e引用块适合放置结论、核心观点或补充说明。\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003ctable\u003e\n\u003cthead\u003e\n\u003ctr\u003e\n  \u003cth\u003eMarkdown 写法\u003c/th\u003e\n  \u003cth\u003e显示效果\u003c/th\u003e\n\u003c/tr\u003e\n\u003c/thead\u003e\n\u003ctbody\u003e\n\u003ctr\u003e\n  \u003ctd\u003e\u003ccode\u003e**重点**\u003c/code\u003e\u003c/td\u003e\n  \u003ctd\u003e\u003cstrong\u003e重点\u003c/strong\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e\u003ccode\u003e*强调*\u003c/code\u003e\u003c/td\u003e\n  \u003ctd\u003e\u003cem\u003e强调\u003c/em\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e\u003ccode\u003e`code`\u003c/code\u003e\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003ecode\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003c/tbody\u003e\n\u003c/table\u003e", "\u003ch1\u003e代码高亮\u003c/h1\u003e\n\u003cp\u003e在 fenced code block 后标注语言名称，浏览器会使用 highlight.js 自动高亮。\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-python\"\u003efrom pathlib import Path\n\n\ndef build_slides(source: str) -\u0026gt; Path:\n    source_path = Path(source)\n    output_path = source_path.with_suffix(\u0026quot;.html\u0026quot;)\n    print(f\u0026quot;构建 {source_path} → {output_path}\u0026quot;)\n    return output_path\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003e支持 Python、JavaScript、C/C++、Java、Go、Rust 等常见语言。\u003c/p\u003e", "\u003ch1\u003e数学公式\u003c/h1\u003e\n\u003cp\u003e使用 \u003ccode\u003e$...$\u003c/code\u003e 编写行内公式，例如质能方程 $E = mc^2$。\u003c/p\u003e\n\u003cp\u003e使用 \u003ccode\u003e$$...$$\u003c/code\u003e 编写独立公式：\u003c/p\u003e\n\u003cp\u003e$$\\int_0^\\infty e^{-x^2}\\,dx = \\frac{\\sqrt{\\pi}}{2}$$\u003c/p\u003e\n\u003cp\u003e矩阵和多行推导也可以直接使用 TeX：\u003c/p\u003e\n\u003cp\u003e$$\n\\begin{aligned}\nf'(x) \u0026amp;= \\lim_{h \\to 0}\\frac{f(x+h)-f(x)}{h} \\\\\n\\nabla \\cdot \\mathbf{E} \u0026amp;= \\frac{\\rho}{\\varepsilon_0}\n\\end{aligned}\n$$\u003c/p\u003e\n\u003cp\u003e公式由本地 MathJax 渲染，离线打开也能正常显示。\u003c/p\u003e", "\u003ch1\u003e表格与任务列表\u003c/h1\u003e\n\u003ch2\u003e表格\u003c/h2\u003e\n\u003ctable\u003e\n\u003cthead\u003e\n\u003ctr\u003e\n  \u003cth\u003e内容\u003c/th\u003e\n  \u003cth\u003e推荐写法\u003c/th\u003e\n  \u003cth\u003e运行期依赖\u003c/th\u003e\n\u003c/tr\u003e\n\u003c/thead\u003e\n\u003ctbody\u003e\n\u003ctr\u003e\n  \u003ctd\u003e普通排版\u003c/td\u003e\n  \u003ctd\u003eMarkdown\u003c/td\u003e\n  \u003ctd\u003e浏览器\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e代码\u003c/td\u003e\n  \u003ctd\u003e带语言名称的代码块\u003c/td\u003e\n  \u003ctd\u003ehighlight.js\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e数学公式\u003c/td\u003e\n  \u003ctd\u003eTeX\u003c/td\u003e\n  \u003ctd\u003eMathJax\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e特殊布局\u003c/td\u003e\n  \u003ctd\u003e原生 HTML + CSS\u003c/td\u003e\n  \u003ctd\u003e浏览器\u003c/td\u003e\n\u003c/tr\u003e\n\u003c/tbody\u003e\n\u003c/table\u003e\n\u003ch2\u003e任务列表\u003c/h2\u003e\n\u003cul\u003e\n\u003cli class=\"task-list-item\"\u003e\u003cinput class=\"task-list-item-checkbox\" type=\"checkbox\" disabled checked/\u003e安装构建依赖\u003c/li\u003e\n\u003cli class=\"task-list-item\"\u003e\u003cinput class=\"task-list-item-checkbox\" type=\"checkbox\" disabled checked/\u003e编写 Markdown\u003c/li\u003e\n\u003cli class=\"task-list-item\"\u003e\u003cinput class=\"task-list-item-checkbox\" type=\"checkbox\" disabled/\u003e构建 HTML\u003c/li\u003e\n\u003cli class=\"task-list-item\"\u003e\u003cinput class=\"task-list-item-checkbox\" type=\"checkbox\" disabled/\u003e全屏检查实际效果\u003c/li\u003e\n\u003c/ul\u003e", "\u003ch1\u003e插入图片\u003c/h1\u003e\n\u003cp\u003e先将图片放入项目的 \u003ccode\u003eimages/\u003c/code\u003e 目录，再使用相对路径：\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-markdown\"\u003e![Markdown 构建流程](images/example.svg)\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003e\u003cimg src=\"images/example.svg\" alt=\"Markdown 构建流程\" /\u003e\u003c/p\u003e\n\u003cp\u003e图片路径相对于\u003cstrong\u003e生成的 HTML 文件\u003c/strong\u003e。模板会限制图片宽高，并随正文一起自动缩放。\u003c/p\u003e", "\u003ch1\u003e原生 HTML 增强\u003c/h1\u003e\n\u003cp\u003e需要控制图片宽度或实现特殊布局时，可以在 Markdown 中直接写 HTML：\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-html\"\u003e\u0026lt;img src=\u0026quot;images/example.svg\u0026quot;\n     alt=\u0026quot;Markdown 构建流程\u0026quot;\n     style=\u0026quot;width: 60%\u0026quot;\u0026gt;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cdiv style=\"display: grid; grid-template-columns: 1fr 1fr; gap: 1.2em; margin-top: .8em;\"\u003e\n  \u003cdiv style=\"padding: .8em 1em; background: #f5f8fc; border-left: 4px solid #004098;\"\u003e\n    \u003cstrong\u003e常规内容\u003c/strong\u003e\u003cbr\u003e优先使用 Markdown，保持源文件简洁。\n  \u003c/div\u003e\n  \u003cdiv style=\"padding: .8em 1em; background: #f5f8fc; border-left: 4px solid #004098;\"\u003e\n    \u003cstrong\u003e特殊布局\u003c/strong\u003e\u003cbr\u003e少量使用 HTML，通用样式放进模板。\n  \u003c/div\u003e\n\u003c/div\u003e", "\u003ch1\u003e构建、播放与检查\u003c/h1\u003e\n\u003cpre\u003e\u003ccode class=\"language-bash\"\u003euv run python build.py slides-template.md\nopen slides-template.html\n\u003c/code\u003e\u003c/pre\u003e\n\u003ctable\u003e\n\u003cthead\u003e\n\u003ctr\u003e\n  \u003cth\u003e操作\u003c/th\u003e\n  \u003cth\u003e按键\u003c/th\u003e\n\u003c/tr\u003e\n\u003c/thead\u003e\n\u003ctbody\u003e\n\u003ctr\u003e\n  \u003ctd\u003e下一页\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003eSpace\u003c/code\u003e、\u003ccode\u003e→\u003c/code\u003e、\u003ccode\u003e↓\u003c/code\u003e、\u003ccode\u003eEnter\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e上一页\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003e←\u003c/code\u003e、\u003ccode\u003e↑\u003c/code\u003e、\u003ccode\u003eBackspace\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e首页 / 末页\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003eHome\u003c/code\u003e / \u003ccode\u003eEnd\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e进入 / 退出全屏\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003ef\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003c/tbody\u003e\n\u003c/table\u003e\n\u003cul\u003e\n\u003cli\u003e修改 Markdown 或模板后，需要重新构建 HTML。\u003c/li\u003e\n\u003cli\u003e页面会自动缩小溢出的正文，但内容过多时仍建议拆页。\u003c/li\u003e\n\u003cli\u003e分享时同时携带 HTML、\u003ccode\u003evendor/\u003c/code\u003e 和实际使用的图片目录。\u003c/li\u003e\n\u003c/ul\u003e"];
+const MY_SLIDES = ["\u003ch1\u003eJYY Slides Template\u003c/h1\u003e\n\u003ch2\u003e科大蓝 · Markdown · 离线播放\u003c/h2\u003e\n\u003cp\u003e一份可直接复制修改的完整编写示例\u003c/p\u003e\n\u003cblockquote\u003e\n\u003cp\u003e内容写在 Markdown 中，样式集中在模板中，浏览器负责播放。\u003c/p\u003e\n\u003c/blockquote\u003e", "\u003ch1\u003e从 Markdown 开始\u003c/h1\u003e\n\u003cp\u003e每页建议以一级标题 \u003ccode\u003e#\u003c/code\u003e 开头，它会自动成为顶部标题栏。第一页自动使用封面版式；章节过渡页可在开头加一行 \u003ccode\u003e\u0026lt;!-- cover --\u0026gt;\u003c/code\u003e。\u003c/p\u003e\n\u003cp\u003e使用\u003cstrong\u003e单独一行\u003c/strong\u003e \u003ccode\u003e---\u003c/code\u003e 分隔页面：\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-markdown\"\u003e# 第一页标题\n\n第一页正文。\n\n---\n\n# 第二页标题\n\n第二页正文。\n\u003c/code\u003e\u003c/pre\u003e\n\u003col\u003e\n\u003cli\u003e新建或复制一个 \u003ccode\u003e.md\u003c/code\u003e 文件。\u003c/li\u003e\n\u003cli\u003e按上面的方式分页并填写内容。\u003c/li\u003e\n\u003cli\u003e运行 \u003ccode\u003euv run python build.py my-talk.md\u003c/code\u003e。\u003c/li\u003e\n\u003cli\u003e用浏览器打开生成的 \u003ccode\u003emy-talk.html\u003c/code\u003e。\u003c/li\u003e\n\u003c/ol\u003e", "\u003ch1\u003e文字、列表与引用\u003c/h1\u003e\n\u003ch2\u003e常用 Markdown 排版\u003c/h2\u003e\n\u003cp\u003e支持 \u003cstrong\u003e粗体\u003c/strong\u003e、\u003cmark\u003e醒目标记\u003c/mark\u003e、\u003cem\u003e斜体\u003c/em\u003e、\u003cdel\u003e删除线\u003c/del\u003e、\u003ccode\u003e行内代码\u003c/code\u003e 和 \u003ca href=\"README.md\"\u003e项目 README\u003c/a\u003e。\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e无序列表适合并列要点\u003c/li\u003e\n\u003cli\u003e每页建议突出一个核心主题\u003c/li\u003e\n\u003cli\u003e内容过多时优先拆成多页\u003c/li\u003e\n\u003c/ul\u003e\n\u003cblockquote\u003e\n\u003cp\u003e引用块适合放置结论、核心观点或补充说明。\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003ctable\u003e\n\u003cthead\u003e\n\u003ctr\u003e\n  \u003cth\u003eMarkdown 写法\u003c/th\u003e\n  \u003cth\u003e显示效果\u003c/th\u003e\n\u003c/tr\u003e\n\u003c/thead\u003e\n\u003ctbody\u003e\n\u003ctr\u003e\n  \u003ctd\u003e\u003ccode\u003e**重点**\u003c/code\u003e\u003c/td\u003e\n  \u003ctd\u003e\u003cstrong\u003e重点\u003c/strong\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e\u003ccode\u003e==警示==\u003c/code\u003e\u003c/td\u003e\n  \u003ctd\u003e\u003cmark\u003e警示\u003c/mark\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e\u003ccode\u003e*强调*\u003c/code\u003e\u003c/td\u003e\n  \u003ctd\u003e\u003cem\u003e强调\u003c/em\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e\u003ccode\u003e`code`\u003c/code\u003e\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003ecode\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003c/tbody\u003e\n\u003c/table\u003e", "\u003ch1\u003e代码高亮\u003c/h1\u003e\n\u003cp\u003e在 fenced code block 后标注语言名称，浏览器会使用 highlight.js 自动高亮。\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-python\"\u003efrom pathlib import Path\n\n\ndef build_slides(source: str) -\u0026gt; Path:\n    source_path = Path(source)\n    output_path = source_path.with_suffix(\u0026quot;.html\u0026quot;)\n    print(f\u0026quot;构建 {source_path} → {output_path}\u0026quot;)\n    return output_path\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003e支持 Python、JavaScript、C/C++、Java、Go、Rust 等常见语言。\u003c/p\u003e", "\u003ch1\u003e数学公式\u003c/h1\u003e\n\u003cp\u003e使用 \u003ccode\u003e$...$\u003c/code\u003e 编写行内公式，例如质能方程 $E = mc^2$。\u003c/p\u003e\n\u003cp\u003e使用 \u003ccode\u003e$$...$$\u003c/code\u003e 编写独立公式：\u003c/p\u003e\n\u003cp\u003e$$\\int_0^\\infty e^{-x^2}\\,dx = \\frac{\\sqrt{\\pi}}{2}$$\u003c/p\u003e\n\u003cp\u003e矩阵和多行推导也可以直接使用 TeX：\u003c/p\u003e\n\u003cp\u003e$$\n\\begin{aligned}\nf'(x) \u0026amp;= \\lim_{h \\to 0}\\frac{f(x+h)-f(x)}{h} \\\\\n\\nabla \\cdot \\mathbf{E} \u0026amp;= \\frac{\\rho}{\\varepsilon_0}\n\\end{aligned}\n$$\u003c/p\u003e\n\u003cp\u003e公式由本地 MathJax 渲染，离线打开也能正常显示。\u003c/p\u003e", "\u003ch1\u003e表格与任务列表\u003c/h1\u003e\n\u003ch2\u003e表格\u003c/h2\u003e\n\u003ctable\u003e\n\u003cthead\u003e\n\u003ctr\u003e\n  \u003cth\u003e内容\u003c/th\u003e\n  \u003cth\u003e推荐写法\u003c/th\u003e\n  \u003cth\u003e运行期依赖\u003c/th\u003e\n\u003c/tr\u003e\n\u003c/thead\u003e\n\u003ctbody\u003e\n\u003ctr\u003e\n  \u003ctd\u003e普通排版\u003c/td\u003e\n  \u003ctd\u003eMarkdown\u003c/td\u003e\n  \u003ctd\u003e浏览器\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e代码\u003c/td\u003e\n  \u003ctd\u003e带语言名称的代码块\u003c/td\u003e\n  \u003ctd\u003ehighlight.js\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e数学公式\u003c/td\u003e\n  \u003ctd\u003eTeX\u003c/td\u003e\n  \u003ctd\u003eMathJax\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e特殊布局\u003c/td\u003e\n  \u003ctd\u003e原生 HTML + CSS\u003c/td\u003e\n  \u003ctd\u003e浏览器\u003c/td\u003e\n\u003c/tr\u003e\n\u003c/tbody\u003e\n\u003c/table\u003e\n\u003ch2\u003e任务列表\u003c/h2\u003e\n\u003cul\u003e\n\u003cli class=\"task-list-item\"\u003e\u003cinput class=\"task-list-item-checkbox\" type=\"checkbox\" disabled checked/\u003e安装构建依赖\u003c/li\u003e\n\u003cli class=\"task-list-item\"\u003e\u003cinput class=\"task-list-item-checkbox\" type=\"checkbox\" disabled checked/\u003e编写 Markdown\u003c/li\u003e\n\u003cli class=\"task-list-item\"\u003e\u003cinput class=\"task-list-item-checkbox\" type=\"checkbox\" disabled/\u003e构建 HTML\u003c/li\u003e\n\u003cli class=\"task-list-item\"\u003e\u003cinput class=\"task-list-item-checkbox\" type=\"checkbox\" disabled/\u003e全屏检查实际效果\u003c/li\u003e\n\u003c/ul\u003e", "\u003ch1\u003e插入图片\u003c/h1\u003e\n\u003cp\u003e先将图片放入项目的 \u003ccode\u003eimages/\u003c/code\u003e 目录，再使用相对路径：\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-markdown\"\u003e![Markdown 构建流程](images/example.svg)\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003e\u003cimg src=\"images/example.svg\" alt=\"Markdown 构建流程\" /\u003e\u003c/p\u003e\n\u003cp\u003e图片路径相对于\u003cstrong\u003e生成的 HTML 文件\u003c/strong\u003e。模板会限制图片宽高，并随正文一起自动缩放。\u003c/p\u003e", "\u003ch1\u003e原生 HTML 增强\u003c/h1\u003e\n\u003cp\u003e需要控制图片宽度或实现特殊布局时，可以在 Markdown 中直接写 HTML：\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-html\"\u003e\u0026lt;img src=\u0026quot;images/example.svg\u0026quot;\n     alt=\u0026quot;Markdown 构建流程\u0026quot;\n     style=\u0026quot;width: 60%\u0026quot;\u0026gt;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cdiv style=\"display: grid; grid-template-columns: 1fr 1fr; gap: 1.2em; margin-top: .8em;\"\u003e\n  \u003cdiv style=\"padding: .8em 1em; background: #f5f8fc; border-left: 4px solid #004098;\"\u003e\n    \u003cstrong\u003e常规内容\u003c/strong\u003e\u003cbr\u003e优先使用 Markdown，保持源文件简洁。\n  \u003c/div\u003e\n  \u003cdiv style=\"padding: .8em 1em; background: #f5f8fc; border-left: 4px solid #004098;\"\u003e\n    \u003cstrong\u003e特殊布局\u003c/strong\u003e\u003cbr\u003e少量使用 HTML，通用样式放进模板。\n  \u003c/div\u003e\n\u003c/div\u003e", "\u003ch1\u003e构建、播放与检查\u003c/h1\u003e\n\u003cpre\u003e\u003ccode class=\"language-bash\"\u003euv run python build.py slides-template.md\nopen slides-template.html\n\u003c/code\u003e\u003c/pre\u003e\n\u003ctable\u003e\n\u003cthead\u003e\n\u003ctr\u003e\n  \u003cth\u003e操作\u003c/th\u003e\n  \u003cth\u003e按键\u003c/th\u003e\n\u003c/tr\u003e\n\u003c/thead\u003e\n\u003ctbody\u003e\n\u003ctr\u003e\n  \u003ctd\u003e下一页\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003eSpace\u003c/code\u003e、\u003ccode\u003e→\u003c/code\u003e、\u003ccode\u003e↓\u003c/code\u003e、\u003ccode\u003eEnter\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e上一页\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003e←\u003c/code\u003e、\u003ccode\u003e↑\u003c/code\u003e、\u003ccode\u003eBackspace\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e首页 / 末页\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003eHome\u003c/code\u003e / \u003ccode\u003eEnd\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n  \u003ctd\u003e进入 / 退出全屏\u003c/td\u003e\n  \u003ctd\u003e\u003ccode\u003ef\u003c/code\u003e\u003c/td\u003e\n\u003c/tr\u003e\n\u003c/tbody\u003e\n\u003c/table\u003e\n\u003cul\u003e\n\u003cli\u003e修改 Markdown 或模板后，需要重新构建 HTML。\u003c/li\u003e\n\u003cli\u003e页面会自动缩小溢出的正文，但内容过多时仍建议拆页。\u003c/li\u003e\n\u003cli\u003e分享时同时携带 HTML、\u003ccode\u003evendor/\u003c/code\u003e 和实际使用的图片目录。\u003c/li\u003e\n\u003c/ul\u003e"];
 // __SLIDES_DATA_END__
 </script>
 <div id="pager"><span id="cur">1</span> / <span id="total">–</span></div>
+<div id="progress"></div>
 <script>
 // 组装单页：开头的 <h1> 提为 .titlebar（放在 .inner 之外），
 // 使标题条不参与整页缩放、左右始终顶格；其余内容进 .inner 等比缩放。
+// 首页、以及开头写了 <!-- cover --> 的页使用封面版式。
 function makeSlide(html, i) {
   const section = document.createElement('section');
+  const marker = /^\s*<!--\s*cover\s*-->/i;
+  const cover = i === 0 || marker.test(html);
+  html = html.replace(marker, '');
   // 首页带 no-anim：刷新时直接显示、不播入场动画；首次翻页即移除，此后正常过渡
-  section.className = 'slide' + (i === 0 ? ' active no-anim' : '');
+  section.className = 'slide' + (cover ? ' cover' : '') + (i === 0 ? ' active no-anim' : '');
   const m = html.match(/^\s*<h1[^>]*>[\s\S]*?<\/h1\s*>/i);
   const title = m ? '<div class="titlebar">' + m[0].trim() + '</div>' : '';
   const body = m ? html.slice(m[0].length) : html;
@@ -243,8 +293,10 @@ slides.forEach(s => document.body.insertBefore(s, document.getElementById('pager
 let i = 0;
 const cur = document.getElementById('cur');
 const total = document.getElementById('total');
+const progress = document.getElementById('progress');
 
 total.textContent = slides.length;
+progress.style.width = `${100 / slides.length}%`;
 
 // 初始高亮/排版当前页
 if (window.hljs) slides[0].querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
@@ -266,6 +318,7 @@ function show(n) {
   slides[i].classList.add('active');
   cur.textContent = i + 1;
   total.textContent = slides.length;
+  progress.style.width = `${(i + 1) / slides.length * 100}%`;
   window.scrollTo(0, 0);
   if (window.hljs) slides[i].querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
   fitSlides();
