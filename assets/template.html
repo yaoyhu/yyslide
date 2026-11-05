@@ -122,14 +122,16 @@ MathJax = {
   }
   .slide tbody tr:nth-child(even) { background: color-mix(in srgb, var(--blue) 3%, white); }
   .slide tbody tr:last-child td { border-bottom: none; }
-  .slide ul:has(> li.task-list-item) { padding-left: 0; list-style: none; }
+  /* 整个列表都是任务项时才去掉缩进；与普通项混排时保留圆点和缩进 */
+  .slide ul:has(> li.task-list-item):not(:has(> li:not(.task-list-item))) { padding-left: 0; }
+  .slide ul:has(> li:not(.task-list-item)) > li.task-list-item > :is(input, p:first-child > input) { margin-left: -1.35em; }
   .slide li.task-list-item { list-style: none; margin: .35em 0; }
   .slide input.task-list-item-checkbox {
     -webkit-appearance: none; appearance: none;
     font: inherit;
-    display: inline-grid; place-content: center;
+    display: inline-block; position: relative;
     width: .85em; height: .85em; margin: 0 .5em 0 0;
-    vertical-align: -.08em;
+    vertical-align: -.08em;  /* 框内没有参与排版的内容，基线即底边，勾选与否位置一致 */
     border: 1.5px solid #94a3b8; border-radius: .25em;
     background: #fff; opacity: 1; cursor: default;
   }
@@ -137,9 +139,10 @@ MathJax = {
     border-color: var(--blue); background: var(--blue);
   }
   .slide input.task-list-item-checkbox:checked::before {
-    content: ""; width: .42em; height: .23em;
+    content: ""; position: absolute; left: 50%; top: 50%;  /* 绝对定位，不改变框的基线 */
+    width: .42em; height: .23em;
     border: solid #fff; border-width: 0 0 .11em .11em;
-    transform: translateY(-.04em) rotate(-45deg);
+    transform: translate(-50%, -70%) rotate(-45deg);
   }
   .slide blockquote {
     border-left: 4px solid var(--blue); border-radius: 0 6px 6px 0;
