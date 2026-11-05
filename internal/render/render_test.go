@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/yaoyhu/yyslide/assets"
 )
 
 func TestSplitIgnoresRulesInsideFences(t *testing.T) {
@@ -34,6 +36,8 @@ func TestRenderPage(t *testing.T) {
 		{"<div class=\"x\">raw</div>", "<div class=\"x\">raw</div>"},
 		{"```python\nprint(1)\n```", `<pre><code class="language-python">print(1)`},
 		{"| a | b |\n| - | - |\n| 1 | 2 |", "<table>"},
+		// 模板靠这个 class 找到 Mermaid 源码；$ 必须原样保留，不能被公式占位符破坏
+		{"```mermaid\nflowchart LR\n  A[\"$5 到 $10\"] --> B\n```", "<pre><code class=\"language-mermaid\">flowchart LR\n  A[&quot;$5 到 $10&quot;] --&gt; B"},
 	}
 	md := newMarkdown()
 	for _, c := range cases {
@@ -70,6 +74,7 @@ func TestHTML(t *testing.T) {
 		"data:image/svg+xml;base64,",
 		"https://x.org/a.png",
 		`url("data:font/woff2;base64,`,
+		"var pele=",
 	} {
 		if !strings.Contains(s, want) {
 			t.Errorf("standalone output missing %q", want)
@@ -88,5 +93,25 @@ func TestHTML(t *testing.T) {
 	}
 	if s := string(page); !strings.Contains(s, `<script src="vendor/mathjax-tex-svg.js">`) || !strings.Contains(s, "<!--live-->\n</body>") {
 		t.Error("linked output should keep vendor paths and inject before </body>")
+	}
+}
+
+// 独立 HTML 把运行库直接写进 <script>，其中出现 </script 会提前结束标签、破坏页面。
+func TestVendorScriptsAreSafeToInline(t *testing.T) {
+	entries, err := assets.FS.ReadDir("vendor")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, e := range entries {
+		if !strings.HasSuffix(e.Name(), ".js") {
+			continue
+		}
+		b, err := assets.FS.ReadFile("vendor/" + e.Name())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(strings.ToLower(string(b)), "</script") {
+			t.Errorf("%s contains </script", e.Name())
+		}
 	}
 }

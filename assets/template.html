@@ -24,6 +24,7 @@ MathJax = {
   Current colors taken from GitHub's CSS
 */.hljs{color:#24292e;background:#fff}.hljs-doctag,.hljs-keyword,.hljs-meta .hljs-keyword,.hljs-template-tag,.hljs-template-variable,.hljs-type,.hljs-variable.language_{color:#d73a49}.hljs-title,.hljs-title.class_,.hljs-title.class_.inherited__,.hljs-title.function_{color:#6f42c1}.hljs-attr,.hljs-attribute,.hljs-literal,.hljs-meta,.hljs-number,.hljs-operator,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-id,.hljs-variable{color:#005cc5}.hljs-meta .hljs-string,.hljs-regexp,.hljs-string{color:#032f62}.hljs-built_in,.hljs-symbol{color:#e36209}.hljs-code,.hljs-comment,.hljs-formula{color:#6a737d}.hljs-name,.hljs-quote,.hljs-selector-pseudo,.hljs-selector-tag{color:#22863a}.hljs-subst{color:#24292e}.hljs-section{color:#005cc5;font-weight:700}.hljs-bullet{color:#735c0f}.hljs-emphasis{color:#24292e;font-style:italic}.hljs-strong{color:#24292e;font-weight:700}.hljs-addition{color:#22863a;background-color:#f0fff4}.hljs-deletion{color:#b31d28;background-color:#ffeef0}</style>
 <script src="vendor/highlight.min.js"></script>
+<script src="vendor/pele.global.js"></script>
 <style>
   :root {
     --bg: #ffffff; --fg: #111111;
@@ -34,8 +35,9 @@ MathJax = {
     --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
             "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
     /* 等宽字体随项目分发（vendor/fonts）；中文回落到黑体，与正文保持一致 */
-    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
-            "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", monospace;
+    --mono-system: ui-monospace, SFMono-Regular, Menlo, Consolas,
+                   "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", monospace;
+    --mono: "JetBrains Mono", var(--mono-system);
   }
   @font-face {
     font-family: "JetBrains Mono";
@@ -202,6 +204,25 @@ MathJax = {
     max-height: var(--image-height, 60vh);
     object-fit: contain;
   }
+  /* Mermaid 图：外层宽度由 JS 按 em 设置，随正文字号缩放；高度上限与图片共用。 */
+  .slide .diagram {
+    max-width: 100%; margin: .8em auto;
+    line-height: normal; overflow-wrap: normal;
+    --pele-bg: var(--bg); --pele-fg: var(--fg); --pele-accent: var(--blue);
+    --pele-line: #475569; --pele-border: color-mix(in srgb, var(--blue) 45%, white);
+    --pele-surface: color-mix(in srgb, var(--blue) 6%, white);
+    --pele-surface-alt: color-mix(in srgb, var(--blue) 12%, white);
+  }
+  .slide .diagram > svg {
+    display: block; width: 100%; height: auto;
+    max-height: var(--image-height, 60vh);
+  }
+  .slide .diagram-error {
+    margin: .8em 0; padding: .6em .9em;
+    border: 1px dashed var(--red); border-radius: 8px;
+    color: var(--red); font: .7em/1.5 var(--mono); white-space: pre-wrap;
+    font-variant-ligatures: none;  /* 须在 font 简写之后；报错要按原样显示 --> */
+  }
   #pager {
     position: fixed; right: 2.5vw; bottom: 2.5vh; z-index: 3;
     font-size: 14px; color: color-mix(in srgb, var(--blue) 70%, #94a3b8);
@@ -344,8 +365,51 @@ function highlight(s) {
   if (window.hljs) s.querySelectorAll('pre code:not([data-highlighted])').forEach(el => hljs.highlightElement(el));
 }
 
+// 语法错误显示在图的位置，同时记入此列表，由 `yyslide pdf` 打印到终端
+window.YYSLIDE_WARNINGS = [];
+// 按固定字号布局，图的结构不随窗口变化；显示大小由外层的 em 宽度决定，与正文同比缩放
+const DIAGRAM_PX = 16;          // 布局字号
+const DIAGRAM_EM = .82;         // 图内文字相对正文的比例
+const DIAGRAM_MAX_WIDTH = 980;  // 16:9 下正文宽度对应的布局宽度
+let diagramCount = 0;
+
+// ```mermaid 代码块 → SVG。容器带 mathjax_ignore：MathJax 每次翻页都扫描全文，否则会把标签里的 $ 当成公式。
+function renderDiagrams(s) {
+  if (!window.pele) return;
+  const root = getComputedStyle(document.documentElement);
+  s.querySelectorAll('pre > code.language-mermaid').forEach(code => {
+    const box = document.createElement('div');
+    const source = code.textContent;
+    code.parentElement.replaceWith(box);
+    try {
+      const { svg, width } = pele.render(source, {
+        fontSize: DIAGRAM_PX,
+        fontFamily: root.getPropertyValue('--sans'),
+        // 不用 JetBrains Mono：网页字体此时可能未加载，测量会与最终显示不一致
+        fontFamilyMono: root.getPropertyValue('--mono-system'),
+        maxWidth: DIAGRAM_MAX_WIDTH,
+        autoDirection: false,
+        idPrefix: `diagram-${++diagramCount}`,  // 渐变、无障碍标题等带 id，多张图之间不能重名
+      });
+      box.className = 'diagram mathjax_ignore';
+      box.style.width = `${width / DIAGRAM_PX * DIAGRAM_EM}em`;
+      box.innerHTML = svg;
+    } catch (e) {
+      box.className = 'diagram-error mathjax_ignore';
+      box.textContent = e.message;
+      window.YYSLIDE_WARNINGS.push(`第 ${slides.indexOf(s) + 1} 页：Mermaid 图有误：${e.message}`);
+    }
+  });
+}
+
+// 每页首次显示时的处理。先渲染图，mermaid 代码块才不会被当作普通代码高亮。
+function prepare(s) {
+  renderDiagrams(s);
+  highlight(s);
+}
+
 // 初始高亮/排版当前页（打印模式下为全部页）
-(PRINT ? slides : [slides[i]]).forEach(highlight);
+(PRINT ? slides : [slides[i]]).forEach(prepare);
 fitSlides();
 if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise().then(fitSlides, fitSlides);
 
@@ -383,7 +447,7 @@ function show(n) {
   progress.style.width = `${(i + 1) / slides.length * 100}%`;
   history.replaceState(null, '', `#/${i + 1}`);
   window.scrollTo(0, 0);
-  highlight(slides[i]);
+  prepare(slides[i]);
   fitSlides();
   if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise().then(fitSlides, fitSlides);
 }
@@ -418,7 +482,7 @@ function fitSlides() {
     }
     inner.style.transform = 'none';
     const height = Math.max(1, bottom - inner.offsetTop);
-    const images = inner.querySelectorAll('img');
+    const images = inner.querySelectorAll('img, .diagram > svg');
     inner.style.setProperty('--image-height', `${height / Math.max(1, images.length)}px`);
     const scale = Math.min(1,
       Math.max(1, width - 1) / Math.max(1, inner.scrollWidth),

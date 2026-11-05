@@ -2,7 +2,7 @@
 
 用 Markdown 写幻灯片，一条命令预览、生成 HTML 或导出 PDF。版式来自[蒋炎岩老师的课程幻灯片](https://jyywiki.cn/GSE/2026/slides1.html)，主题色为科大蓝。
 
-单个可执行文件，模板、MathJax、highlight.js 和字体都已内置，无需 Python 或 Node。
+单个可执行文件，模板、MathJax、highlight.js、Pele 和字体都已内置，无需 Python 或 Node。
 
 ## 安装
 
@@ -28,7 +28,7 @@ yyslide pdf           # 16:9 PDF → dist/my-talk.pdf
 
 ## 写法
 
-```markdown
+````markdown
 # 第一页的标题（首页自动使用封面版式）
 
 ---
@@ -40,11 +40,22 @@ yyslide pdf           # 16:9 PDF → dist/my-talk.pdf
 
 ---
 
-<!-- cover -->
-# 章节过渡页
+# Mermaid 图表
+
+```mermaid
+flowchart LR
+  写作 --> 预览 --> 导出
 ```
 
+---
+
+<!-- cover -->
+# 章节过渡页
+````
+
 单独一行 `---` 分页。图片路径相对于 Markdown 文件。
+
+Mermaid 图由 [Pele](https://github.com/obsidianmd/pele) 渲染，语法兼容 Mermaid，布局和样式是它自己的；配色跟随主题，`%%{init: ...}%%` 中的主题设置不生效。语法错误会以红字显示在图的位置，`yyslide pdf` 同时在终端给出警告。
 
 播放时用 `←` `→`、空格、`j` `k` 翻页，`f` 全屏。地址中的 `#/N` 对应第 N 页。
 
@@ -63,4 +74,4 @@ go build
 
 ## 许可证
 
-MIT。内置的 MathJax（Apache-2.0）、highlight.js（BSD-3-Clause）和 JetBrains Mono（OFL-1.1）遵循各自的许可证。
+MIT。内置的 MathJax（Apache-2.0）、highlight.js（BSD-3-Clause）、Pele（MIT）和 JetBrains Mono（OFL-1.1）遵循各自的许可证。

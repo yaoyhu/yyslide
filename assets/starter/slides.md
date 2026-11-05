@@ -94,6 +94,32 @@ $$
 
 ---
 
+# Mermaid 图表
+
+在 fenced code block 后标注 `mermaid`，就能把文字画成图，配色自动跟随主题：
+
+````markdown
+```mermaid
+flowchart LR
+  A[Markdown] --> B{yyslide}
+  B -->|preview| C[浏览器]
+  B -->|build| D[单文件 HTML]
+  B -->|pdf| E[PDF]
+```
+````
+
+```mermaid
+flowchart LR
+  A[Markdown] --> B{yyslide}
+  B -->|preview| C[浏览器]
+  B -->|build| D[单文件 HTML]
+  B -->|pdf| E[PDF]
+```
+
+还支持时序图、类图、状态图、ER 图、甘特图和饼图等，语法错误会以红字显示在图的位置。
+
+---
+
 # 表格与任务列表
 
 ## 表格
@@ -103,6 +129,7 @@ $$
 | 普通排版 | Markdown | 浏览器 |
 | 代码 | 带语言名称的代码块 | highlight.js |
 | 数学公式 | TeX | MathJax |
+| 图表 | Mermaid 代码块 | Pele |
 | 特殊布局 | 原生 HTML + CSS | 浏览器 |
 
 ## 任务列表

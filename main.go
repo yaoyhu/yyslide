@@ -263,8 +263,12 @@ func cmdPDF(args []string) error {
 	if err := os.MkdirAll(filepath.Dir(*out), 0o755); err != nil {
 		return err
 	}
-	if err := pdf.Export(htmlPath, *out); err != nil {
+	warnings, err := pdf.Export(htmlPath, *out)
+	if err != nil {
 		return err
+	}
+	for _, w := range warnings {
+		fmt.Fprintf(os.Stderr, "警告：%s\n", w)
 	}
 	fmt.Printf("已导出 %d 页：%s\n", n, rel(*out))
 	return nil
