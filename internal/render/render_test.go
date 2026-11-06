@@ -47,6 +47,41 @@ func TestRenderPage(t *testing.T) {
 	}
 }
 
+func TestFootnotes(t *testing.T) {
+	// 每页独立编号；定义可写在页内任意位置，公式不被 Markdown 改写，两处引用共用一个序号
+	slides := Slides("# A[^x]\n\n[^x]: 来源 $a_1$\n\n再次引用[^x]\n\n---\n\n正文[^y]\n\n[^y]: 第二页\n")
+	if len(slides) != 2 {
+		t.Fatalf("got %d slides", len(slides))
+	}
+	for _, want := range []string{
+		`<h1>A<sup class="footnote-ref">1</sup></h1>`,
+		`再次引用<sup class="footnote-ref">1</sup>`,
+		`<div class="footnotes"`,
+		`来源 $a_1$`,
+	} {
+		if !strings.Contains(slides[0], want) {
+			t.Errorf("slide 1 missing %q:\n%s", want, slides[0])
+		}
+	}
+	if !strings.Contains(slides[1], `正文<sup class="footnote-ref">1</sup>`) {
+		t.Errorf("numbering should restart on each slide:\n%s", slides[1])
+	}
+	// 锚点会改写记录页码的 #/N，id 则会在多页之间重复
+	for i, s := range slides {
+		if strings.Contains(s, "<a ") || strings.Contains(s, " id=") {
+			t.Errorf("slide %d has anchors or ids:\n%s", i+1, s)
+		}
+	}
+	if got := firstHeading(slides[0]); got != "A" {
+		t.Errorf("title = %q", got)
+	}
+
+	// 定义在别页时无法解析，原样显示；没有引用的定义不输出脚注区
+	if s := Slides("正文[^z]\n\n---\n\n[^z]: 别页的定义\n"); !strings.Contains(s[0], "[^z]") || strings.Contains(s[1], "footnotes") {
+		t.Errorf("cross-page footnote: %q", s)
+	}
+}
+
 func TestHTML(t *testing.T) {
 	dir := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(dir, "images"), 0o755); err != nil {

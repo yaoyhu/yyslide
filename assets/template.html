@@ -193,6 +193,25 @@ MathJax = {
     text-decoration: none;
   }
   .slide hr { border: none; border-top: 2px solid var(--border); margin: 1.2em 0; }
+  /* 脚注：JS 把它移到 .inner 之外贴住页底，不随正文缩放，正文高度相应扣除；右侧避让页码。 */
+  .slide .footnotes {
+    position: absolute; z-index: 2;
+    left: 4vw; right: max(4vw, calc(2.5vw + 80px)); bottom: 3vh;
+    font-size: .62em; line-height: 1.45;
+    color: var(--muted); text-align: left;
+    overflow-wrap: anywhere;
+  }
+  .slide.cover .footnotes { left: 8vw; }
+  .slide .footnotes hr { width: 8em; margin: 0 0 .4em; border-top: 1px solid var(--border); }
+  .slide .footnotes ol { margin: 0; padding-left: 1.4em; }
+  .slide .footnotes li { margin: 0; }
+  .slide .footnotes p { margin: 0; }
+  .slide sup.footnote-ref {
+    margin: 0 .1em;
+    font-size: .68em; font-weight: 600; line-height: 0;  /* 行高为 0：上标不撑开所在行 */
+    color: var(--blue);
+  }
+  .slide .titlebar sup.footnote-ref { color: inherit; }
   .slide img {
     display: block;
     max-width: 90%;
@@ -291,6 +310,7 @@ MathJax = {
   }
   html.print .slide.cover { display: flex; }
   html.print #pager, html.print #progress { display: none; }
+  html.print .slide .footnotes { right: 4vw; }  /* 打印时没有页码，无需避让 */
   @media print { * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style>
 </head>
@@ -345,6 +365,8 @@ function makeSlide(html, i) {
   const title = m ? '<div class="titlebar">' + m[0].trim() + '</div>' : '';
   const body = m ? html.slice(m[0].length) : html;
   section.innerHTML = title + '<div class="inner">' + body + '</div>';
+  const notes = section.querySelector('.inner > .footnotes');
+  if (notes) section.append(notes);
   return section;
 }
 
@@ -458,28 +480,43 @@ window.addEventListener('hashchange', () => {
   if (n) show(n - 1);
 });
 
-// 标题保留独立字号；正文按扣除标题、padding 后的真实空间等比缩小。
+// 二分查找满足 fits() 的最大字号
+function fitFont(el, max, fits) {
+  let lo = 0, hi = max;
+  for (let n = 0; n < 16; n++) {
+    const size = (lo + hi) / 2;
+    el.style.fontSize = `${size}px`;
+    if (fits()) lo = size;
+    else hi = size;
+  }
+  el.style.fontSize = `${lo}px`;
+}
+
+// 标题和脚注保留独立字号；正文按扣除标题、脚注、padding 后的真实空间等比缩小。
 function fitSlides() {
   slides.forEach(s => {
     if (!s.classList.contains('active') && !PRINT) return; // 隐藏页没有可测量的尺寸
     const inner = s.querySelector('.inner');
     const title = s.querySelector('.titlebar');
+    const notes = s.querySelector('.footnotes');
     const css = getComputedStyle(s);
     const width = s.clientWidth - parseFloat(css.paddingLeft) - parseFloat(css.paddingRight);
-    const bottom = s.clientHeight - parseFloat(css.paddingBottom);
     // 极窄/极矮窗口或长标题：标题最多占用屏幕 30%，给正文留出空间。
     if (title) {
       title.style.fontSize = '';
-      const base = parseFloat(css.fontSize);
-      let lo = 0, hi = base;
-      for (let n = 0; n < 16; n++) {
-        const size = (lo + hi) / 2;
-        title.style.fontSize = `${size}px`;
-        if (title.offsetHeight <= s.clientHeight * .3 && title.scrollWidth <= title.clientWidth) lo = size;
-        else hi = size;
-      }
-      title.style.fontSize = `${lo}px`;
+      fitFont(title, parseFloat(css.fontSize),
+        () => title.offsetHeight <= s.clientHeight * .3 && title.scrollWidth <= title.clientWidth);
     }
+    // 脚注过长时缩小字号，最多占用屏幕 25%。
+    if (notes) {
+      notes.style.fontSize = '';
+      if (notes.offsetHeight > s.clientHeight * .25) {
+        fitFont(notes, parseFloat(getComputedStyle(notes).fontSize), () => notes.offsetHeight <= s.clientHeight * .25);
+      }
+    }
+    const bottom = notes
+      ? notes.offsetTop - parseFloat(css.fontSize) * .5
+      : s.clientHeight - parseFloat(css.paddingBottom);
     inner.style.transform = 'none';
     const height = Math.max(1, bottom - inner.offsetTop);
     const images = inner.querySelectorAll('img, .diagram > svg');
@@ -502,6 +539,8 @@ slides.forEach(s => {
     observer.observe(s.querySelector('.inner'));
     const title = s.querySelector('.titlebar');
     if (title) observer.observe(title);
+    const notes = s.querySelector('.footnotes');
+    if (notes) observer.observe(notes);
   }
   s.addEventListener('load', scheduleFit, true);
   s.addEventListener('error', scheduleFit, true);

@@ -80,6 +80,8 @@ var (
 	mathRe = regexp.MustCompile(`\\\$|\$\$[\s\S]+?\$\$|\$(?:\\.|[^$\n])+\$`)
 	h1Re   = regexp.MustCompile(`(?s)<h1[^>]*>(.*?)</h1\s*>`)
 	tagRe  = regexp.MustCompile(`<[^>]*>`)
+
+	footnoteRefRe = regexp.MustCompile(`<sup class="footnote-ref">\d+</sup>`)
 )
 
 func split(source string) []string {
@@ -136,19 +138,20 @@ func firstHeading(slide string) string {
 	if m == nil {
 		return ""
 	}
-	return strings.TrimSpace(html.UnescapeString(tagRe.ReplaceAllString(m[1], "")))
+	heading := footnoteRefRe.ReplaceAllString(m[1], "") // 否则脚注序号会混进页面标题
+	return strings.TrimSpace(html.UnescapeString(tagRe.ReplaceAllString(heading, "")))
 }
 
 func newMarkdown() goldmark.Markdown {
 	return goldmark.New(
-		goldmark.WithExtensions(extension.Table, extension.Strikethrough, markExtension{}),
+		goldmark.WithExtensions(extension.Table, extension.Strikethrough, extension.Footnote, markExtension{}),
 		goldmark.WithParserOptions(
 			parser.WithInlineParsers(util.Prioritized(extension.NewTaskCheckBoxParser(), 0)),
 			parser.WithASTTransformers(util.Prioritized(taskListClass{}, 0)),
 		),
 		goldmark.WithRendererOptions(
 			ghtml.WithUnsafe(), // 允许在 Markdown 中直接写 HTML
-			renderer.WithNodeRenderers(util.Prioritized(taskCheckBoxRenderer{}, 0)),
+			renderer.WithNodeRenderers(util.Prioritized(taskCheckBoxRenderer{}, 0), util.Prioritized(footnoteRenderer{}, 0)),
 		),
 	)
 }
