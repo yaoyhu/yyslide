@@ -24,6 +24,17 @@ func TestSplitIgnoresRulesInsideFences(t *testing.T) {
 	}
 }
 
+func TestColumnSeparator(t *testing.T) {
+	// 紧跟在列表后也要分栏；代码块里的写法示例保持原样
+	got := Slides("- a\n::col::\n- b\n\n```\n::col::\n```\n")[0]
+	if !strings.Contains(got, "</ul>\n<!-- col -->\n<ul>") {
+		t.Errorf("separator not recognized:\n%s", got)
+	}
+	if !strings.Contains(got, "<code>::col::\n</code>") {
+		t.Errorf("separator inside fence was rewritten:\n%s", got)
+	}
+}
+
 func TestRenderPage(t *testing.T) {
 	cases := []struct{ in, want string }{
 		{"==警示==", "<mark>警示</mark>"},

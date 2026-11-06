@@ -76,6 +76,7 @@ var (
 	fenceRe      = regexp.MustCompile("^[ \t]*(`{3,}|~{3,})")
 	fenceCloseRe = regexp.MustCompile("^[ \t]*(`{3,}|~{3,})[ \t]*$") // 结束围栏后面不能有信息字符串
 	ruleRe       = regexp.MustCompile("^[ \t]*---[ \t]*$")
+	colRe        = regexp.MustCompile("^[ \t]*::col::[ \t]*$")
 	// \$ 也要保护：Markdown 会把它变成 $，MathJax 就会误认作公式边界；原样保留则由 MathJax 显示为 $
 	mathRe = regexp.MustCompile(`\\\$|\$\$[\s\S]+?\$\$|\$(?:\\.|[^$\n])+\$`)
 	h1Re   = regexp.MustCompile(`(?s)<h1[^>]*>(.*?)</h1\s*>`)
@@ -106,6 +107,9 @@ func split(source string) []string {
 			current = append(current, line)
 		} else if ruleRe.MatchString(line) {
 			flush()
+		} else if colRe.MatchString(line) {
+			// 补上空行，否则紧跟在列表后的 ::col:: 会被并入最后一项；模板按这个注释分栏
+			current = append(current, "", "<!-- col -->", "")
 		} else {
 			current = append(current, line)
 		}

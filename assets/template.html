@@ -201,7 +201,7 @@ MathJax = {
     color: var(--muted); text-align: left;
     overflow-wrap: anywhere;
   }
-  .slide.cover .footnotes { left: 8vw; }
+  .slide.stage .footnotes { left: 8vw; }
   .slide .footnotes hr { width: 8em; margin: 0 0 .4em; border-top: 1px solid var(--border); }
   .slide .footnotes ol { margin: 0; padding-left: 1.4em; }
   .slide .footnotes li { margin: 0; }
@@ -255,33 +255,115 @@ MathJax = {
     background: linear-gradient(90deg, var(--blue), #0ea5e9);
     transition: width .28s cubic-bezier(.22, .61, .36, 1);
   }
-  /* 封面 / 章节页：首页自动套用，其余页在开头写 <!-- cover --> 启用。
-     白底、水平与垂直居中，标题下方一段蓝色短横线。 */
-  .slide.cover {
+  /* 版式：页面开头写 <!-- cover --> 等标记选择，名称与 Slidev 一致。首页默认 cover。 */
+  /* .stage（JS 添加）：没有顶部蓝条，内容垂直居中。 */
+  .slide.stage {
     flex-direction: column; justify-content: center;
-    padding: 6vh 8vw; text-align: center;
+    padding: 6vh 8vw;
     background:
       radial-gradient(40em 28em at 100% 100%, color-mix(in srgb, var(--blue) 7%, transparent), transparent 70%),
       var(--bg);
   }
-  .slide.cover.active, .slide.cover.leaving { display: flex; }
-  .slide.cover .titlebar {
-    margin: 0 0 .9em; padding: 0 0 .5em;
-    background: none; box-shadow: none;
-  }
-  .slide.cover .titlebar::after {
-    content: ""; display: block; width: 3.2em; height: 5px; margin: .6em auto 0;
-    border-radius: 3px; background: var(--blue);
-  }
-  .slide.cover .titlebar h1 {
+  .slide:is(.stage, .figure, .full):is(.active, .leaving) { display: flex; }
+  .slide:is(.cover, .statement, .fact, .quote) { text-align: center; }
+  .slide:is(.cover, .statement, .fact, .quote) .inner { transform-origin: top center; }
+  .slide.stage .titlebar { margin: 0 0 .5em; padding: 0; background: none; box-shadow: none; }
+  .slide.stage .titlebar h1 {
     font-size: 2.3em; line-height: 1.25; color: var(--blue);
     letter-spacing: .01em; text-shadow: none;
   }
-  .slide.cover .titlebar h1 :is(b, strong, mark) { color: var(--red); }
-  .slide.cover h2 { color: var(--fg); font-weight: 600; margin: 0 0 .3em; }
-  .slide.cover h3, .slide.cover p { color: var(--muted); }
-  .slide.cover .inner { transform-origin: top center; }
+  .slide.stage .titlebar h1 :is(b, strong, mark) { color: var(--red); }
+  /* cover 标题幻灯片（居中）/ section 节标题（靠左）：标题下方一段蓝色短横线。 */
+  .slide:is(.cover, .section) .titlebar { margin-bottom: .9em; padding-bottom: .5em; }
+  .slide:is(.cover, .section) .titlebar::after {
+    content: ""; display: block; width: 3.2em; height: 5px; margin: .6em 0 0;
+    border-radius: 3px; background: var(--blue);
+  }
+  .slide.cover .titlebar::after { margin-inline: auto; }
+  .slide:is(.cover, .section) h2 { color: var(--fg); font-weight: 600; margin: 0 0 .3em; }
+  .slide:is(.cover, .section) :is(h3, p) { color: var(--muted); }
   .slide.cover blockquote { display: inline-block; max-width: 32em; margin-top: 1.4em; }
+  /* statement 一句话观点 / fact 大数字：一级标题写观点或数字，其余为说明。 */
+  .slide.statement .titlebar h1 { font-size: 2.8em; }
+  .slide.fact .titlebar h1 { font-size: 5em; font-weight: 800; line-height: 1.1; }
+  .slide:is(.statement, .fact) p { color: var(--muted); }
+  /* quote 引用：引用块放大，后面的段落作为出处。 */
+  .slide.quote blockquote {
+    margin: 0; padding: 0; border: none; background: none;
+    color: var(--fg); font-size: 1.5em; font-weight: 600; line-height: 1.5;
+  }
+  .slide.quote .inner > p { margin-top: .8em; color: var(--muted); }
+  /* end 总结 / 结束：最后一段（致谢）弱化。 */
+  .slide.end .titlebar h1 { font-size: 1.9em; }
+  .slide.end .inner > p:last-child { margin-top: 1em; color: var(--muted); }
+  /* two-cols / compare / three-cols：::col:: 分隔各栏，比较版式把栏首小标题做成表头。 */
+  .slide .cols { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 1.5em; }
+  .slide.two-cols .cols { align-items: center; }
+  .slide.three-cols .cols { --cols: 3; }
+  .slide .col > :first-child { margin-top: 0; }
+  .slide .col img { max-width: 100%; }
+  .slide.compare .col > :is(h2, h3):first-child {
+    margin-bottom: .5em; padding-bottom: .25em;
+    color: var(--blue); border-bottom: 2px solid var(--blue);
+  }
+  /* figure 结论 + 大图：标题写结论，图片占满其余高度，alt 文字作图注。 */
+  .slide.figure { flex-direction: column; padding-bottom: 5vh; }
+  .slide.figure .inner { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .slide.figure figure { flex: 1 1 0; min-height: 0; margin: 0; display: flex; flex-direction: column; }
+  .slide.figure figure img { flex: 1 1 0; min-height: 0; width: 100%; max-width: 100%; max-height: none; margin: 0; }
+  .slide.figure figcaption { flex: none; margin-top: .3em; text-align: center; font-size: .7em; color: var(--muted); }
+  /* results 结果表 + 结论：首列加粗的行高亮，引用块作为结论条。 */
+  .slide.results table { width: 100%; }
+  .slide.results tr:has(td:first-child strong) td {
+    color: var(--blue); font-weight: 700;
+    background: color-mix(in srgb, var(--blue) 9%, white);
+  }
+  .slide.results blockquote {
+    border: none; border-radius: 8px;
+    color: #fff; background: var(--blue); font-weight: 600;
+  }
+  .slide.results blockquote :is(b, strong) { color: #fde68a; }
+  /* agenda 目录：由 JS 根据 section 页生成，高亮当前章节。 */
+  .slide .agenda-list { font-size: 1.2em; color: var(--muted); }
+  .slide .agenda-list li { margin: .4em 0; }
+  .slide .agenda-list li.now { color: var(--blue); font-weight: 700; }
+  .slide .agenda-list a { color: inherit; text-decoration: none; }
+  /* image-right / image-left 图片与标题：正文里的图片由 JS 移到 .pane。
+     文字栏靠 padding 让出位置，fitSlides 据此测量可用宽度。 */
+  .slide:is(.image-right, .image-left) { --pane: 60vw; }
+  .slide.image-right { padding: 12vh calc(var(--pane) + 3vw) 6vh 4vw; }
+  .slide.image-left { padding: 12vh 4vw 6vh calc(var(--pane) + 3vw); }
+  .slide:is(.image-right, .image-left) .titlebar {
+    margin: 0 0 .6em; padding: 0;
+    background: none; box-shadow: none;
+  }
+  .slide:is(.image-right, .image-left) .titlebar h1 { color: var(--blue); line-height: 1.25; text-shadow: none; }
+  .slide:is(.image-right, .image-left) .titlebar h1 :is(b, strong, mark) { color: var(--red); }
+  .slide.image-right .footnotes { right: calc(var(--pane) + 3vw); }
+  .slide.image-left .footnotes { left: calc(var(--pane) + 3vw); }
+  .slide .pane {
+    position: absolute; top: 0; bottom: 0; width: var(--pane);
+    display: flex; flex-direction: column; gap: 2vh;
+  }
+  .slide.image-right .pane { right: 0; padding: 4vh 4vw 7vh 0; }  /* 下方避让页码 */
+  .slide.image-left .pane { left: 0; padding: 4vh 0 7vh 4vw; }
+  .slide .pane img {
+    flex: 1; min-height: 0; width: 100%; max-width: 100%; margin: 0;
+    object-fit: contain;
+  }
+  .slide.crop .pane img { object-fit: cover; }  /* 铺满图片栏、居中裁掉超出部分 */
+  /* full 全屏图：图片铺满整页，标题和文字浮在左下角。 */
+  .slide.full { flex-direction: column; justify-content: flex-end; padding: 4vh 4vw; }
+  .slide.full .pane { left: 0; right: 0; width: auto; padding: 0; gap: 0; z-index: 0; }
+  .slide.full .pane img { border-radius: 0; }
+  .slide.full .titlebar, .slide.full .inner {
+    align-self: flex-start; width: auto; max-width: 70%;
+    padding: .25em .7em; border-radius: 6px;
+    background: color-mix(in srgb, white 90%, transparent); box-shadow: none;
+  }
+  .slide.full .titlebar { margin: 0 0 .4em; }
+  .slide.full .titlebar h1 { font-size: 1.1em; color: var(--blue); text-shadow: none; }
+  .slide.full .inner.blank { display: none; }
   /* AI 补充内容（行内 span）：inline-block 让 padding 上下左右都实际占位生效 */
   .slide span.aigc {
     display: inline-block;
@@ -308,9 +390,9 @@ MathJax = {
     position: relative; display: block; width: 100vw; height: 100vh;
     break-after: page; animation: none;
   }
-  html.print .slide.cover { display: flex; }
+  html.print .slide:is(.stage, .figure, .full) { display: flex; }
   html.print #pager, html.print #progress { display: none; }
-  html.print .slide .footnotes { right: 4vw; }  /* 打印时没有页码，无需避让 */
+  html.print .slide:not(.image-right) .footnotes { right: 4vw; }  /* 打印时没有页码，无需避让 */
   @media print { * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style>
 </head>
@@ -348,25 +430,88 @@ const MY_SLIDES = [
 <script>
 // 组装单页：开头的 <h1> 提为 .titlebar（放在 .inner 之外），
 // 使标题条不参与整页缩放、左右始终顶格；其余内容进 .inner 等比缩放。
-// 首页、以及开头写了 <!-- cover --> 的页使用封面版式。
+// 页面开头的 <!-- 版式 --> 标记决定版式；首页默认 cover。
 const PRINT = new URLSearchParams(location.search).has('print');
 if (PRINT) document.documentElement.classList.add('print');
 // 地址栏 #/N 记录当前页（从 1 开始），刷新或预览自动重载后停留在同一页
 const START = Math.max(0, Math.min(MY_SLIDES.length - 1, (parseInt(location.hash.slice(2)) || 1) - 1));
 
+const LAYOUT_MARKER = /^\s*<!--\s*(cover|section|statement|fact|quote|end|figure|results|agenda|two-cols|compare|three-cols|(?:image-right|image-left|full)(?:\s+crop)?)\s*-->/i;
+const STAGE_LAYOUTS = ['cover', 'section', 'statement', 'fact', 'quote', 'end'];
+const PANE_LAYOUTS = ['image-right', 'image-left', 'full'];
+const COLUMN_LAYOUTS = ['two-cols', 'compare', 'three-cols'];
+
+// 把图片移出所在段落；段落因此变空时一并删除，避免留下多余的空白。
+function detachImage(img, target) {
+  const parent = img.parentElement;
+  target.append(img);
+  if (parent.tagName === 'P' && !parent.textContent.trim() && !parent.children.length) parent.remove();
+}
+
+// 按 ::col:: 留下的注释把正文分栏
+function splitColumns(inner) {
+  const cols = document.createElement('div');
+  cols.className = 'cols';
+  let col = cols.appendChild(document.createElement('div'));
+  col.className = 'col';
+  [...inner.childNodes].forEach(node => {
+    if (node.nodeType === Node.COMMENT_NODE && node.data.trim() === 'col') {
+      col = cols.appendChild(document.createElement('div'));
+      col.className = 'col';
+    } else {
+      col.append(node);
+    }
+  });
+  inner.append(cols);
+}
+
+// 每张图配一个 <figure>，alt 文字作图注
+function wrapFigures(inner) {
+  inner.querySelectorAll('img').forEach(img => {
+    const figure = document.createElement('figure');
+    img.closest('p, .inner > *')?.before(figure);
+    if (!figure.parentElement) inner.append(figure);
+    detachImage(img, figure);
+    if (img.alt) {
+      const caption = document.createElement('figcaption');
+      caption.textContent = img.alt;
+      figure.append(caption);
+    }
+  });
+}
+
+function applyLayout(section, classes) {
+  const inner = section.querySelector('.inner');
+  const name = classes[0];
+  if (PANE_LAYOUTS.includes(name)) {
+    const images = [...inner.querySelectorAll('img')];
+    if (!images.length) return;  // 没有图片时退回普通版式
+    const pane = document.createElement('div');
+    pane.className = 'pane';
+    images.forEach(img => detachImage(img, pane));
+    section.append(pane);
+    if (!inner.textContent.trim() && !inner.children.length) inner.classList.add('blank');
+  }
+  if (COLUMN_LAYOUTS.includes(name)) splitColumns(inner);
+  if (name === 'figure') wrapFigures(inner);
+  if (STAGE_LAYOUTS.includes(name)) section.classList.add('stage');
+  section.classList.add(...classes);
+}
+
 function makeSlide(html, i) {
   const section = document.createElement('section');
-  const marker = /^\s*<!--\s*cover\s*-->/i;
-  const cover = i === 0 || marker.test(html);
-  html = html.replace(marker, '');
+  const layout = html.match(LAYOUT_MARKER);
+  html = html.replace(LAYOUT_MARKER, '');
   // 首页带 no-anim：刷新时直接显示、不播入场动画；首次翻页即移除，此后正常过渡
-  section.className = 'slide' + (cover ? ' cover' : '') + (i === START || PRINT ? ' active no-anim' : '');
+  section.className = 'slide' + (i === START || PRINT ? ' active no-anim' : '');
   const m = html.match(/^\s*<h1[^>]*>[\s\S]*?<\/h1\s*>/i);
   const title = m ? '<div class="titlebar">' + m[0].trim() + '</div>' : '';
   const body = m ? html.slice(m[0].length) : html;
   section.innerHTML = title + '<div class="inner">' + body + '</div>';
   const notes = section.querySelector('.inner > .footnotes');
   if (notes) section.append(notes);
+  const classes = layout ? layout[1].toLowerCase().split(/\s+/) : i === 0 ? ['cover'] : [];
+  if (classes.length) applyLayout(section, classes);
   return section;
 }
 
@@ -423,6 +568,34 @@ function renderDiagrams(s) {
     }
   });
 }
+
+// 目录页：列出全部 section 页，高亮本页所属的章节，点击跳转。
+function buildAgendas() {
+  const sections = slides.filter(s => s.classList.contains('section'));
+  slides.filter(s => s.classList.contains('agenda')).forEach(page => {
+    if (!sections.length) {
+      window.YYSLIDE_WARNINGS.push(`第 ${slides.indexOf(page) + 1} 页：目录页没有可列出的章节，需要用 <!-- section --> 标记章节页`);
+      return;
+    }
+    const at = slides.indexOf(page);
+    const current = sections.filter(s => slides.indexOf(s) <= at).pop();
+    const list = document.createElement('ol');
+    list.className = 'agenda-list';
+    sections.forEach(s => {
+      const item = list.appendChild(document.createElement('li'));
+      if (s === current) item.className = 'now';
+      const link = item.appendChild(document.createElement('a'));
+      link.href = `#/${slides.indexOf(s) + 1}`;
+      const heading = s.querySelector('.titlebar h1');
+      if (heading) {
+        link.innerHTML = heading.innerHTML;
+        link.querySelectorAll('sup.footnote-ref').forEach(sup => sup.remove());
+      }
+    });
+    page.querySelector('.inner').prepend(list);
+  });
+}
+buildAgendas();
 
 // 每页首次显示时的处理。先渲染图，mermaid 代码块才不会被当作普通代码高亮。
 function prepare(s) {
@@ -519,8 +692,13 @@ function fitSlides() {
       : s.clientHeight - parseFloat(css.paddingBottom);
     inner.style.transform = 'none';
     const height = Math.max(1, bottom - inner.offsetTop);
-    const images = inner.querySelectorAll('img, .diagram > svg');
-    inner.style.setProperty('--image-height', `${height / Math.max(1, images.length)}px`);
+    // 高度由同一栏内的图平分；并排的图互不挤占。
+    const visuals = 'img, .diagram > svg';
+    const stacks = inner.querySelectorAll('.col');
+    const stacked = stacks.length
+      ? Math.max(...[...stacks].map(col => col.querySelectorAll(visuals).length))
+      : inner.querySelectorAll(visuals).length;
+    inner.style.setProperty('--image-height', `${height / Math.max(1, stacked)}px`);
     const scale = Math.min(1,
       Math.max(1, width - 1) / Math.max(1, inner.scrollWidth),
       Math.max(1, height - 1) / Math.max(1, inner.scrollHeight, inner.offsetHeight));
