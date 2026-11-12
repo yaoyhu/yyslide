@@ -35,7 +35,8 @@ type Deck struct {
 	Source string   // Markdown 文件绝对路径
 	Dir    string   // Markdown 所在目录，图片等相对路径以此为基准
 	Title  string   // 页面标题
-	Slides []string // 每页渲染后的 HTML 片段
+	Slides []string // 每页渲染后的 HTML 片段，不含隐藏页
+	Hidden int      // 用 <!-- hide --> 隐藏的页数
 }
 
 // Load 读取并渲染 Markdown 文件。title 为空时使用首页一级标题，再退回文件名。
@@ -48,7 +49,10 @@ func Load(path, title string) (*Deck, error) {
 	if err != nil {
 		return nil, err
 	}
-	slides := Slides(string(src))
+	slides, hidden := renderSource(string(src))
+	if len(slides) == 0 && hidden > 0 {
+		return nil, fmt.Errorf("%s 中的 %d 页都已用 <!-- hide --> 隐藏", path, hidden)
+	}
 	if len(slides) == 0 {
 		return nil, fmt.Errorf("%s 中没有幻灯片内容", path)
 	}
@@ -58,18 +62,48 @@ func Load(path, title string) (*Deck, error) {
 	if title == "" {
 		title = strings.TrimSuffix(filepath.Base(abs), filepath.Ext(abs))
 	}
-	return &Deck{Source: abs, Dir: filepath.Dir(abs), Title: title, Slides: slides}, nil
+	return &Deck{Source: abs, Dir: filepath.Dir(abs), Title: title, Slides: slides, Hidden: hidden}, nil
 }
 
-// Slides 按独立一行 --- 分页（代码块内除外），逐页转换为 HTML。
+// Slides 按独立一行 --- 分页（代码块内除外），去掉隐藏页后逐页转换为 HTML。
 func Slides(source string) []string {
+	slides, _ := renderSource(source)
+	return slides
+}
+
+func renderSource(source string) ([]string, int) {
+	pages, hidden := visible(split(source))
 	md := newMarkdown()
-	pages := split(source)
 	out := make([]string, len(pages))
 	for i, page := range pages {
 		out[i] = renderPage(md, page)
 	}
-	return out
+	return out, hidden
+}
+
+// visible 去掉页首带 <!-- hide --> 的页面，返回其余页面和隐藏的页数。
+// 隐藏页在渲染前就被删除：页码、目录和首页封面都按剩下的页面计算，导出的 HTML 里也不含它们的内容。
+func visible(pages []string) ([]string, int) {
+	var kept []string
+	for _, page := range pages {
+		if !isHidden(page) {
+			kept = append(kept, page)
+		}
+	}
+	return kept, len(pages) - len(kept)
+}
+
+// isHidden 只检查页首连续的注释行，因此 hide 可以写在版式标记前后，正文里的同名注释不会误伤。
+func isHidden(page string) bool {
+	for _, line := range strings.Split(page, "\n") {
+		switch {
+		case hideRe.MatchString(line):
+			return true
+		case strings.TrimSpace(line) != "" && !commentLineRe.MatchString(line):
+			return false
+		}
+	}
+	return false
 }
 
 var (
@@ -77,6 +111,9 @@ var (
 	fenceCloseRe = regexp.MustCompile("^[ \t]*(`{3,}|~{3,})[ \t]*$") // 结束围栏后面不能有信息字符串
 	ruleRe       = regexp.MustCompile("^[ \t]*---[ \t]*$")
 	colRe        = regexp.MustCompile("^[ \t]*::col::[ \t]*$")
+	// 只认整行的 <!-- hide -->，不和版式合写，避免 <!-- TODO: hide --> 这类普通注释误隐藏页面
+	hideRe        = regexp.MustCompile(`(?i)^[ \t]*<!--[ \t]*hide[ \t]*-->[ \t]*$`)
+	commentLineRe = regexp.MustCompile(`^[ \t]*<!--.*-->[ \t]*$`)
 	// \$ 也要保护：Markdown 会把它变成 $，MathJax 就会误认作公式边界；原样保留则由 MathJax 显示为 $
 	mathRe = regexp.MustCompile(`\\\$|\$\$[\s\S]+?\$\$|\$(?:\\.|[^$\n])+\$`)
 	h1Re   = regexp.MustCompile(`(?s)<h1[^>]*>(.*?)</h1\s*>`)

@@ -205,30 +205,38 @@ func cmdBuild(args []string) error {
 	if *out == "" {
 		*out = defaultOutput(md, ".html")
 	}
-	n, err := writeStandalone(md, *title, *out)
+	deck, err := writeStandalone(md, *title, *out)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("已生成 %d 页：%s\n", n, rel(*out))
+	fmt.Printf("已生成 %s：%s\n", pageCount(deck), rel(*out))
 	return nil
 }
 
-func writeStandalone(md, title, out string) (int, error) {
+// pageCount 同时报出隐藏页数，免得忘了某页还标着 <!-- hide -->。
+func pageCount(deck *render.Deck) string {
+	if deck.Hidden > 0 {
+		return fmt.Sprintf("%d 页（隐藏 %d 页）", len(deck.Slides), deck.Hidden)
+	}
+	return fmt.Sprintf("%d 页", len(deck.Slides))
+}
+
+func writeStandalone(md, title, out string) (*render.Deck, error) {
 	deck, err := render.Load(md, title)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	page, warnings, err := deck.HTML(render.Options{Standalone: true})
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	for _, w := range warnings {
 		fmt.Fprintf(os.Stderr, "警告：%s\n", w)
 	}
 	if err := os.MkdirAll(filepath.Dir(out), 0o755); err != nil {
-		return 0, err
+		return nil, err
 	}
-	return len(deck.Slides), os.WriteFile(out, page, 0o644)
+	return deck, os.WriteFile(out, page, 0o644)
 }
 
 func cmdPDF(args []string) error {
@@ -256,7 +264,7 @@ func cmdPDF(args []string) error {
 	}
 	defer os.RemoveAll(tmp)
 	htmlPath := filepath.Join(tmp, "slides.html")
-	n, err := writeStandalone(md, *title, htmlPath)
+	deck, err := writeStandalone(md, *title, htmlPath)
 	if err != nil {
 		return err
 	}
@@ -270,7 +278,7 @@ func cmdPDF(args []string) error {
 	for _, w := range warnings {
 		fmt.Fprintf(os.Stderr, "警告：%s\n", w)
 	}
-	fmt.Printf("已导出 %d 页：%s\n", n, rel(*out))
+	fmt.Printf("已导出 %s：%s\n", pageCount(deck), rel(*out))
 	return nil
 }
 

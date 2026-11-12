@@ -93,7 +93,8 @@ func TestDiagramLabelsSurviveMathJax(t *testing.T) {
 }
 
 func TestLayouts(t *testing.T) {
-	html := standalone(t, "# 首页默认封面\n\n---\n\n<!-- section -->\n# 节\n\n---\n\n# 普通\n\n---\n\n<!-- cover -->\n# 封面\n\n---\n\n"+
+	// 隐藏页在最前面：首页封面、各页版式都不受影响
+	html := standalone(t, "<!-- hide -->\n# 隐藏的旧首页\n\n---\n\n# 首页默认封面\n\n---\n\n<!-- section -->\n# 节\n\n---\n\n# 普通\n\n---\n\n<!-- cover -->\n# 封面\n\n---\n\n"+
 		"<!-- image-right crop -->\n# 图\n\n文字\n\n![](a.png)\n\n---\n\n<!-- image-right -->\n# 没有图片\n\n文字\n")
 	ctx, cancel, err := openPrintView(html)
 	if err != nil {

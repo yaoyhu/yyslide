@@ -93,6 +93,8 @@ flowchart LR
 
 `image-right`、`image-left` 和 `full` 可以加 `crop`（如 `<!-- image-right crop -->`），让图片铺满并居中裁掉超出部分，适合白边很大的图。
 
+在页首单独写一行 `<!-- hide -->` 可以隐藏这一页，方便在一份文件里保留旧页面、按场合挑选。它可以和版式标记各占一行、顺序不限。隐藏页不会出现在预览、HTML 和 PDF 中，页码和目录按剩下的页面计算；`build` 和 `pdf` 会提示隐藏了几页。
+
 Mermaid 图由 [Pele](https://github.com/obsidianmd/pele) 渲染，语法兼容 Mermaid，布局和样式是它自己的；配色跟随主题，`%%{init: ...}%%` 中的主题设置不生效。语法错误会以红字显示在图的位置，`yyslide pdf` 同时在终端给出警告。
 
 播放时用 `←` `→`、空格、`j` `k` 翻页，`f` 全屏。地址中的 `#/N` 对应第 N 页。

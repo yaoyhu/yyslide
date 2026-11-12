@@ -35,6 +35,46 @@ func TestColumnSeparator(t *testing.T) {
 	}
 }
 
+func TestHideSlides(t *testing.T) {
+	src := strings.Join([]string{
+		"<!-- hide -->\n# 旧封面",
+		"# 保留一",
+		"<!-- figure -->\n<!-- HIDE -->\n# 版式之后也能隐藏",
+		"\n  <!-- hide -->  \n\n<!-- section -->\n# 版式之前、带空白",
+		"# 保留二\n\n<!-- hide -->",                   // 不在页首：只是普通注释
+		"```markdown\n<!-- hide -->\n```\n\n# 保留三", // 代码块里的写法示例
+		"<!-- hide this -->\n# 保留四",                // 不是单独的 hide
+		"<!-- two-cols -->\n<!-- hide -->\n# 两栏\n\n左\n\n::col::\n\n右",
+	}, "\n\n---\n\n")
+	pages, hidden := visible(split(src))
+	if hidden != 4 || len(pages) != 4 {
+		t.Fatalf("hidden = %d, kept %q", hidden, pages)
+	}
+	for i, want := range []string{"# 保留一", "# 保留二", "# 保留三", "# 保留四"} {
+		if !strings.Contains(pages[i], want) {
+			t.Errorf("page %d = %q, want %q", i+1, pages[i], want)
+		}
+	}
+}
+
+func TestLoadHiddenSlides(t *testing.T) {
+	dir := t.TempDir()
+	md := filepath.Join(dir, "slides.md")
+	_ = os.WriteFile(md, []byte("<!-- hide -->\n# 旧标题\n\n---\n\n# 新标题\n"), 0o644)
+	deck, err := Load(md, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 页面标题取自第一张可见页
+	if len(deck.Slides) != 1 || deck.Hidden != 1 || deck.Title != "新标题" {
+		t.Errorf("slides = %d, hidden = %d, title = %q", len(deck.Slides), deck.Hidden, deck.Title)
+	}
+	_ = os.WriteFile(md, []byte("<!-- hide -->\n# A\n\n---\n\n<!-- hide -->\n# B\n"), 0o644)
+	if _, err := Load(md, ""); err == nil || !strings.Contains(err.Error(), "2 页都已用 <!-- hide --> 隐藏") {
+		t.Errorf("err = %v", err)
+	}
+}
+
 func TestRenderPage(t *testing.T) {
 	cases := []struct{ in, want string }{
 		{"==警示==", "<mark>警示</mark>"},
